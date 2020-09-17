@@ -29,22 +29,10 @@ to classes, possibly existing classes within RCCN
 
 '''
 import config
-import obscvty, urllib2, time
+import urllib2, time
 import smpplib.client
 import smpplib.consts
 
-def _get_imsi(ext):
-    try:
-        cmd = 'show subscriber extension %s' % (ext)
-        ret = vty.command(cmd)
-        m = re.compile('IMSI: ([0-9]*)').search(ret)
-        if m:
-            return m.group(1)
-        else:
-            return False
-    except:
-        print sys.exc_info()[1]
-        return False
 
 def rx_alert_notification(pdu):
 
@@ -65,7 +53,8 @@ def rx_alert_notification(pdu):
                 return
             if extension[:6] != myprefix:
                 log.info('Detach from foreign extension, send it home.')
-                imsi = _get_imsi(extension)
+
+                imsi = sub.get_imsi_from_msisdn(extension)
                 try:
                     rk_hlr = riak_client.bucket('hlr')
                     subscriber = rk_hlr.get(str(imsi), timeout=config.RIAK_TIMEOUT)
@@ -112,10 +101,10 @@ def rx_alert_notification(pdu):
                 log.debug('!! No subscriber in hlr?? %s', str(ex))
                 return
             if current_bts != myip:
-                # Our HLR doesn't expect this MS to be here.
-                # So either the hlr is out of date, or this is new here.
-                imsi = _get_imsi(pdu.source_addr)
                 try:
+                    # Our HLR doesn't expect this MS to be here.
+                    # So either the hlr is out of date, or this is new here.
+                    imsi = sub.get_imsi_from_msisdn(pdu.source_addr)
                     sub.update_location(imsi, extension, True)
                 except config.SubscriberException as ex:
                     log.debug('Subscriber error: %s', str(ex))
@@ -174,7 +163,5 @@ if __name__ == "__main__":
     log = config.roaming_log
     sub = config.Subscriber()
     num = config.Numbering()
-    #open a VTY console, don't bring up and down all the time.
-    vty = obscvty.VTYInteract('OpenBSC', '127.0.0.1', 4242)
     log.info('Starting up alert notification listener for %s on %s' % (myprefix, myip))
     smpp_bind()

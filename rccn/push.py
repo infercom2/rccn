@@ -17,7 +17,6 @@
 ############################################################################
 
 from config import *
-import obscvty
 import smtplib
 import random
 from optparse import OptionParser
@@ -37,6 +36,7 @@ Favor de intervenir y arreglar esta situacion manualmente.
 
 def check(auth, recent, hours=2, single=''):
     """ Get sub from the local PG db and see their status in riak """
+    sub = subscriber.Subscriber()
     cur = db_conn.cursor()
     if single:
         cur.execute("SELECT msisdn,name,authorized FROM Subscribers WHERE msisdn=%s", [single])
@@ -53,16 +53,17 @@ def check(auth, recent, hours=2, single=''):
         for msisdn,name,authorized in _subs:
             print '----------------------------------------------------'
             print "%s: Checking %s %s" % (n, msisdn, name)
-            imsi=osmo_ext2imsi(msisdn)
-            if imsi:
+            try:
+                imsi=sub.get_imsi_from_msisdn(msisdn)
                 print "Local IMSI: \033[96m%s\033[0m" % (imsi)
                 get(msisdn, imsi, authorized, single)
-            else:
+            except NoDataException:
                 msg="""
                 Local Subscriber %s from PG Not Found on OSMO HLR!
                 """ % msisdn
                 advise(msg)
                 print "\033[91;1mLocal Subscriber from PG Not Found on OSMO HLR!\033[0m"
+
             n=n-1
         print '----------------------------------------------------\n'
         
@@ -167,24 +168,6 @@ def get(msisdn, imsi, auth, single = False):
     except Exception as ex:
         print ex
 
-
-def osmo_ext2imsi(ext):
-    try:
-        vty = obscvty.VTYInteract('OpenBSC', '127.0.0.1', 4242)
-        cmd = 'show subscriber extension %s' % (ext)
-        t = vty.command(cmd)        
-        m=re.compile('IMSI: ([0-9]*)').search(t)
-        if m:
-            return m.group(1)
-        else: 
-            return False
-    except socket.error as err:
-        print sys.exc_info()[1][1]
-        print "Osmo VTY refused connection. Aborting.\n"
-        sys.exit(1)
-    except Exception as e:
-        print sys.exc_info()[1]
-        return False
 
 if __name__ == '__main__':
     parser = OptionParser()

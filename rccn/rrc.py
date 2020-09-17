@@ -193,7 +193,7 @@ def update_local_connected():
             if  bts != config['local_ip']:
                 try:
                     # From SQLite
-                    imsi = sub._get_imsi(msisdn[0])
+                    imsi = sub.get_imsi_from_msisdn(msisdn[0])
                 except SubscriberException as e:
                     roaming_log.info("Error getting IMSI for %s: %s" % (str(msisdn[0]), e))
                     continue
@@ -261,4 +261,3 @@ if __name__ == '__main__':
             purge_inactive_subscribers(int(options.since))
         else:
             purge_inactive_subscribers(21)
-    
