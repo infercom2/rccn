@@ -888,6 +888,8 @@ class Subscriber:
             imsi = self._osmo_hlr.get_imsi_from_msisdn(msisdn)
         except OsmoHlrError as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+        except NoDataException:
+            raise
         return str(imsi)
 
     def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):

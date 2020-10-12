@@ -54,7 +54,11 @@ def rx_alert_notification(pdu):
             if extension[:6] != myprefix:
                 log.info('Detach from foreign extension, send it home.')
 
-                imsi = sub.get_imsi_from_msisdn(extension)
+                try:
+                    imsi = sub.get_imsi_from_msisdn(extension)
+                except (config.SubscriberException, config.NoDataException):
+                    log.error("No IMSI for Extension?")
+                    return
                 try:
                     rk_hlr = riak_client.bucket('hlr')
                     subscriber = rk_hlr.get(str(imsi), timeout=config.RIAK_TIMEOUT)
@@ -106,7 +110,7 @@ def rx_alert_notification(pdu):
                     # So either the hlr is out of date, or this is new here.
                     imsi = sub.get_imsi_from_msisdn(pdu.source_addr)
                     sub.update_location(imsi, extension, True)
-                except config.SubscriberException as ex:
+                except (config.SubscriberException, config.NoDataException) as ex:
                     log.debug('Subscriber error: %s', str(ex))
                     return
 

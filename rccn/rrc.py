@@ -194,7 +194,7 @@ def update_local_connected():
                 try:
                     # From SQLite
                     imsi = sub.get_imsi_from_msisdn(msisdn[0])
-                except SubscriberException as e:
+                except (SubscriberException, NoDataException) as e:
                     roaming_log.info("Error getting IMSI for %s: %s" % (str(msisdn[0]), e))
                     continue
                 # We may have a false positive in connected if we missed an "offline"
