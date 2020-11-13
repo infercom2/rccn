@@ -614,7 +614,7 @@ class Subscriber:
             imsi = msisdn
             msisdn = extension
         else:
-            imsi = self._get_imsi(msisdn)
+            imsi = self.get_imsi_from_msisdn(msisdn)
 
         subscriber_number = config['internal_prefix'] + msisdn
         # check if subscriber already exists
