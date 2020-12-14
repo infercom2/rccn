@@ -115,12 +115,12 @@ class LiveStatistics:
                 if (len(keys) == 0 or len(values) == 0):
                     continue
                 for i,val in enumerate(values):
-                    if i > len(keys)-1:
+                    try:
+                        call[keys[i]]=val
+                    except IndexError as index_error:
                         log.debug("FS data error: [%s] (%s) was out of range", i, val)
                         log.debug("offending line %s", line)
                         log.debug("KEYS: %s", keys)
-                        continue
-                    call[keys[i]]=val
                 calls.append(call)
 
         to_send=[]
