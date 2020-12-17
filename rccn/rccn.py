@@ -65,6 +65,15 @@ def handler(session, args):
         session.consoleLog('info', '\033[38;5;202mRCCN \033[0mReloaded Dialplan Module in handler.\n')
     dialplan = Dialplan(session)
     log.info("Lookup dialplan for called number: %s" % destination_number)
+    try:
+        cur = db_conn.cursor()
+    except psycopg2.InterfaceError as pg_err:
+        log.error("FS Database Connection Problem, exiting. [%s]", str(pg_err))
+        session.consoleLog("notice", "Database Problem, exiting. [" + str(pg_err) + "]")
+        session.execute('set_zombie_exec')
+        session.hangup()
+        session.execute('set', "api_res=${fsctl shutdown}")
+        return
     ret = dialplan.lookup()
     log.info('Leaving rccn.handler(%s)\n\n\033[90;1m====\033[0m\n', ret)
     session.consoleLog("notice", "== \033[38;5;202mRCCN - [ %s->%s (%s) ] \033[0m\n" %
