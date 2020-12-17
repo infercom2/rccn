@@ -31,7 +31,7 @@ import binascii
 import datetime
 import time
 import psycopg2
-import sys
+import sys, os
 import logging
 
 from corepost.web import RESTResource, route, Http
@@ -531,6 +531,10 @@ class StatisticsRESTService:
             data = json.dumps(stats.monitor_feed(), cls=PGEncoder)
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
+        except psycopg2.InterfaceError as e:
+            if str(e) == "connection already closed":
+                api_log.debug("Exiting due to DB Error: %s", e)
+                os._exit(-1)
         api_log.debug(data)
         return data
 
@@ -715,7 +719,10 @@ class ConfigurationRESTService:
             data = json.dumps(config.get_site(), cls=PGEncoder)
         except ConfigurationException as e:
             data = {'status': 'failed', 'error': str(e)}
-    
+        except psycopg2.InterfaceError as e:
+            if str(e) == "connection already closed":
+                api_log.debug("Exiting due to DB Error: %s", e)
+                os._exit(-1)
         api_log.debug(data)
         return data
 
