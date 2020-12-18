@@ -97,9 +97,10 @@ def update_list(subscribers, auth_only=False):
             if len(msisdn) == 5 and riak_data['authorized'] ==1:
                 roaming_log.info('Subscriber %s is new in roaming' % number)
                 roaming_log.debug('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
-                sub.update(msisdn, "roaming number", number)
                 if auth_only:
+                    sub.update(msisdn, "roaming number", number, False)
                     continue
+                sub.update(msisdn, "roaming number", number)
                 roaming_log.info('Send roaming welcome message to %s' % number)
                 send_welcome_sms(number)
                 # Expire this on where I think it was last.

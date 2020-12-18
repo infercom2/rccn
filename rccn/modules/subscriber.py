@@ -620,10 +620,11 @@ class Subscriber:
             raise SubscriberException('Error in getting new msisdn for existing subscriber')
 
 
-    def update(self, msisdn, name, number):
+    def update(self, msisdn, name, number, update_loc=True):
         imsi = self._get_imsi(msisdn)
         self._authorize_subscriber_in_local_hlr(msisdn, number, name)
-        self.update_location(imsi, number, True)
+        if update_loc:
+            self.update_location(imsi, number, True)
 
     def update_location(self, imsi, msisdn, ts_update=False):
         try:
