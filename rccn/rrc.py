@@ -62,8 +62,9 @@ def update_list(subscribers):
                     # We have an imsi (connected) with full extension in osmo subs 
                     # but not in riak
                     # Must have been deleted.
-                    roaming_log.debug('Purging %s from local Osmo HLR' % msisdn)
-                    sub.purge(msisdn)
+                    # Let's not trust riak
+                    roaming_log.debug('Would Purge %s from local Osmo HLR' % msisdn)
+                    #sub.purge(msisdn)
                     continue
                 else:
                     raise NumberingException(e)
