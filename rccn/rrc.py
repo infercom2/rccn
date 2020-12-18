@@ -27,6 +27,21 @@ from optparse import OptionParser
 import random
 import urllib2
 
+def auth_known_imsis():
+    if not use_nitb_osmo_stack:
+        roaming_log.error("Not Supported with Split Stack")
+        return
+    sub = Subscriber()
+    try:
+        five_digit = sub.get_all_5digits()
+        roaming_log.info('Got %s Five Digit Subscribers' % len(five_digit))
+        if len(five_digit) == 0:
+            roaming_log.info('No Subscribers')
+        else:
+            update_list(five_digit, auth_only=True)
+    except SubscriberException as e:
+        roaming_log.error("An error ocurred getting the list of subscribers: %s" % e)
+
 def update_foreign_subscribers():
     sub = Subscriber()
     try:
@@ -50,10 +65,10 @@ def update_foreign_subscribers():
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
 
 
-def update_list(subscribers):
+def update_list(subscribers, auth_only=False):
     numbering = Numbering()
     sub = Subscriber()
-    for msisdn,imsi in subscribers:
+    for i,msisdn,imsi in subscribers:
         try:
             try:
                 riak_data =  numbering.get_dhlr_entry(imsi)
@@ -83,6 +98,8 @@ def update_list(subscribers):
                 roaming_log.info('Subscriber %s is new in roaming' % number)
                 roaming_log.debug('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
                 sub.update(msisdn, "roaming number", number)
+                if auth_only:
+                    continue
                 roaming_log.info('Send roaming welcome message to %s' % number)
                 send_welcome_sms(number)
                 # Expire this on where I think it was last.
@@ -206,6 +223,8 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-c", "--cron", dest="cron", action="store_true",
         help="Running from cron, add a delay to not all hit riak at same time")
+    parser.add_option("-a", "--auth", dest="auth", action="store_true",
+        help="Authorise Known IMSIs (for 'closed' networks)")
     parser.add_option("-f", "--foreign", dest="foreign", action="store_true",
         help="Update Foreign Subscribers")
     parser.add_option("-l", "--local", dest="local", action="store_true",
@@ -230,6 +249,8 @@ if __name__ == '__main__':
         print "Waiting %s seconds..." % wait
         time.sleep(wait)
 
+    if options.auth:
+        auth_known_imsis()
     if options.foreign:
         update_foreign_subscribers()
     if options.local:

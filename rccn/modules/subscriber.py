@@ -255,7 +255,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(self._hlr_db_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT id, extension FROM subscriber WHERE length(extension) = 5 AND extension != ?", [(config['smsc'])])
+            sq_hlr_cursor.execute("SELECT id, extension, imsi FROM subscriber WHERE length(extension) = 5 AND extension != ?", [(config['smsc'])])
             extensions = sq_hlr_cursor.fetchall()
             if extensions == []:
                 raise NoDataException('No extensions found')
@@ -332,7 +332,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(self._hlr_db_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT extension,imsi FROM subscriber WHERE length(extension) = 5 AND lac > 0")
+            sq_hlr_cursor.execute("SELECT id, extension, imsi FROM subscriber WHERE length(extension) = 5 AND lac > 0")
             unregistered = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return unregistered
@@ -345,7 +345,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(self._hlr_db_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT extension,imsi FROM subscriber WHERE length(extension) = 11 AND extension NOT LIKE ? AND lac > 0", ( [config['internal_prefix']+'%']) )
+            sq_hlr_cursor.execute("SELECT id, extension, imsi FROM subscriber WHERE length(extension) = 11 AND extension NOT LIKE ? AND lac > 0", ( [config['internal_prefix']+'%']) )
             foreign = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return foreign
