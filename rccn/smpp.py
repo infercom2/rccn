@@ -45,6 +45,15 @@ def rx_alert_notification(pdu):
     else:
         return
 
+    if pdu.ms_availability_status == 4 and hasattr(config, 'welcome_sms'):
+        # Note: status 4 is not part of the SMPP specification,
+        # and is not supported in mainstream Osmocom core network.
+        extension = pdu.source_addr
+        log.info('Received INITIAL ATTACH for %s: %s' % (mode, extension))
+        if len(extension) == 5:
+            sms.local_smpp_submit_sm(config.network_name, extension, config.welcome_sms)
+            return
+
     if pdu.ms_availability_status == 2:
         log.info('Received Detach Notification for %s: %s' % (mode, pdu.source_addr))
         if mode == 'EXT':
@@ -167,5 +176,6 @@ if __name__ == "__main__":
     log = config.roaming_log
     sub = config.Subscriber()
     num = config.Numbering()
+    sms = config.SMS()
     log.info('Starting up alert notification listener for %s on %s' % (myprefix, myip))
     smpp_bind()
