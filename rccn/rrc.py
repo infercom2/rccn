@@ -68,7 +68,7 @@ def update_foreign_subscribers():
 def update_list(subscribers, auth_only=False):
     numbering = Numbering()
     sub = Subscriber()
-    for i,msisdn,imsi in subscribers:
+    for msisdn,imsi in subscribers:
         try:
             try:
                 riak_data =  numbering.get_dhlr_entry(imsi)

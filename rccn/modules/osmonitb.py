@@ -127,7 +127,7 @@ class OsmoNitb(object):
         try:
             sq_hlr = sqlite3.connect(self.hlr_db_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT id, extension FROM subscriber WHERE length(extension) = 5")
+            sq_hlr_cursor.execute("SELECT extension, imsi FROM subscriber WHERE length(extension) = 5")
             extensions = sq_hlr_cursor.fetchall()
             if extensions == []:
                 raise NoDataException('No extensions found')
