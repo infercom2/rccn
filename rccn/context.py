@@ -263,6 +263,7 @@ class Context:
                 self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
                 self.session.hangup('UNALLOCATED_NUMBER')
             self.session.execute('set', 'ringback=%(500,300,440,400);%(450,800,440,400)')
+            self.session.execute('set', 'sip_h_Jitsi-Conference-Room=%s' % ("Room" + callee[-1:]))
             codec = 'PCMA'
             bridge_params = ''
             gw = 'rhizomatica'
