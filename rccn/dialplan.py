@@ -265,7 +265,7 @@ class Dialplan:
     def check_roaming_destination(self):
         try:
             _tagged_roaming = self._n.is_number_roaming(self.destination_number)
-            if (self.calling_host != mncc_ip_address and
+            if (not self.caller_is_local() and
                     self.destination_number[:6] != config['internal_prefix'] and
                     self._n.is_number_known(self.destination_number)):
                 log.info('Incoming call to Foreign destination: %s', self.destination_number)
@@ -421,6 +421,8 @@ class Dialplan:
 
         if self.check_extension():
             return
+        if self.check_webphone():
+            return
         if self.check_roaming():
             return
         if self.check_external():
@@ -428,8 +430,6 @@ class Dialplan:
         ret = self.check_local()
         if ret:
             return ret
-        if self.check_webphone():
-            return
         if self.check_internal():
             return
         if self.context.check_test():

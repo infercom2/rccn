@@ -200,6 +200,8 @@ class Numbering:
             raise NumberingException('PG_HLR error checking if number is known:' % e)
 
     def is_number_internal(self, destination_number):
+        if len(destination_number) != 11:
+            return False
         siteprefix = destination_number[:6]
         if siteprefix == config['internal_prefix']:
             return False
