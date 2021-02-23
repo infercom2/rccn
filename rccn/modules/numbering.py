@@ -299,9 +299,8 @@ class Numbering:
             else:
                 raise NumberingException('PG_DB subscriber not found: %s' % number)
             return False
-
-        except psycopg2.DatabaseError as e:
-            raise NumberingException('PG_HLR error checking if number is in roaming:' % e)
+        except psycopg2.DatabaseError as pg_error:
+            raise NumberingException('PG_HLR error [%s] checking if number is in roaming:' % pg_error)
 
 
     def get_bts_distributed_hlr(self, imsi, bts):
