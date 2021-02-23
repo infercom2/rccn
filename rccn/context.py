@@ -701,11 +701,7 @@ class Context:
                     self.webphone()
                     return
                 else:
-                    # check if destination number is an international call
-                    if self.destination_number[0] == '+' or re.search(r'^00', self.destination_number) != None:
-                        return
-                    else:
-                        # called number must be wrong, hangup call
-                        log.error("End of Dialplan with <%s> -> <%s>", self.calling_number, self.destination_number)
-                        self.session.execute('playback', '%s' % self.get_audio_file('SERVICE_UNAVAILABLE'))
-                        #self.session.hangup()
+                    # called number must be wrong, hangup call
+                    log.error("End of Dialplan with <%s> -> <%s>", self.calling_number, self.destination_number)
+                    self.session.execute('playback', '%s' % self.get_audio_file('SERVICE_UNAVAILABLE'))
+                    #self.session.hangup()
