@@ -645,6 +645,8 @@ class Subscriber:
             full_msisdn = config['internal_prefix'] + msisdn
             entry = self._osmo_hlr.get_imsi_from_msisdn(full_msisdn)
             return entry is not None
+        except NoDataException:
+            return False
         except OsmoHlrError as e:
             raise SubscriberException('SQ_HLR error sub: %s' % e.args[0])
 

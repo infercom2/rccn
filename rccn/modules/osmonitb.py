@@ -96,8 +96,8 @@ class OsmoNitb(object):
             sq_hlr_cursor = sq_hlr.cursor()
             sq_hlr_cursor.execute('SELECT extension,imsi from subscriber WHERE extension=?', [(msisdn)])
             extension = sq_hlr_cursor.fetchone()
-            if  extension == None:
-                raise OsmoHlrError('Extension not found in the OsmoHLR')
+            if extension == None:
+                raise NoDataException('Extension not found in the OsmoHLR')
             imsi = extension[1]
         except sqlite3.Error as e:
             raise OsmoHlrError('SQ_HLR error: %s' % e.args[0])
