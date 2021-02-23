@@ -421,9 +421,9 @@ class Dialplan:
 
         if self.check_extension():
             return
-        if self.check_webphone():
-            return
         if self.check_roaming():
+            return
+        if self.check_webphone():
             return
         if self.check_external():
             return

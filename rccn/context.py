@@ -696,6 +696,10 @@ class Context:
                         self.bridge(self.destination_number)
                     except NumberingException as _ex:
                         log.error(_ex)
+                    return
+                if self.numbering.is_number_webphone(self.destination_number):
+                    self.webphone()
+                    return
                 else:
                     # check if destination number is an international call
                     if self.destination_number[0] == '+' or re.search(r'^00', self.destination_number) != None:
