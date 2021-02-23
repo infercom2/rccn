@@ -186,7 +186,11 @@ def update_local_connected():
                             #roaming_log.info("Deleting %s !!" % msisdn[0])
                             #sub.delete(msisdn[0])
                             continue
+                else:
+                    roaming_log.info("Fatal Database Error: %s", e)
+                    sys.exit()
                 continue
+
             # extension is in pg_hlr
             roaming_log.debug("%s is at %s acording to local hlr" % (msisdn[0], bts))
             
