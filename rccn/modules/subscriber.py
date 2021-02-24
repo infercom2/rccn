@@ -291,9 +291,12 @@ class Subscriber:
             msisdns = []
             for connected_sub in connected_subs:
                 if (connected_sub["msisdn"][:6] == config['internal_prefix']):
-                    # The RAI PhP code expects a doubly nested array. See
-                    # rai/modules/subscriber.php:113
-                    msisdns.append([connected_sub["msisdn"]])
+                    # This used to return a list of tuples of one (as returned by sqlite3),
+                    # not a nested list.
+                    # TODO: There is/was code where we got away with passing a tuple of one
+                    # - most likely into psycopg2.
+                    # Check if we can do away with this nesting here.
+                    msisdns.append((connected_sub["msisdn"],))
 
             return msisdns
         except OsmoMscError as e:
