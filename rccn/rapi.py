@@ -57,6 +57,8 @@ class SubscriberRESTService:
     @route('/')
     def getAll(self, request):
         api_log.info('%s - [GET] %s', request.getHost().host, self.path)
+        if request.getHeader('Origin').find("8080") > -1:
+            request.setHeader('Access-Control-Allow-Origin','*')
         try:
             sub = Subscriber()
             data = json.dumps(sub.get_all(), cls=PGEncoder)
@@ -108,6 +110,8 @@ class SubscriberRESTService:
     @route('/extension/<imsi>')
     def extension(self, request, imsi):
         api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path, imsi)
+        if request.getHeader('Origin').find("8080") > -1:
+            request.setHeader('Access-Control-Allow-Origin','*')
         try:
             sub =Subscriber()
             data = json.dumps(sub.get_local_extension(imsi), cls=PGEncoder)
