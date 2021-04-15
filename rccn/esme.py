@@ -305,7 +305,10 @@ def post_tx_message(pdu):
 def smpp_bind(client):
     while True:
         try:
-            smpplib.client.logger.setLevel('INFO')
+            if hasattr(smpplib.client, 'logger'):
+                smpplib.client.logger.setLevel('INFO')
+            else:
+                client.logger.setLevel('INFO')
             client.set_message_received_handler(rx_deliver_sm)
             client.set_message_sent_handler(post_tx_message)
             #client.set_test_handler(my_test)
