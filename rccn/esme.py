@@ -38,6 +38,9 @@ from random import randint
 smpp_messages = {}
 no_unknown_delivery = 0
 
+class UDHError(Exception):
+    pass
+
 def cs(l, exit=0):
     code.interact(local=dict(globals(), **l))
     if exit == 1:
@@ -79,6 +82,37 @@ def local_submit_one(source, destination, unicode_text):
     del pdu
     del smpp_client
 
+def multipart(pdu):
+    try:
+        _udh_length = ord(pdu.short_message[:1])
+        _start = _udh_length+1
+        udh = parse_udh(pdu.short_message[:_udh_length+1])
+        if udh is False:
+            log.warning('UDHI but failed to parse UDH. Accept and drop message.. %s',
+                        binascii.hexlify(pdu.short_message))
+            raise UDHError
+            #return smpplib.consts.SMPP_ESME_ROK
+
+        if udh['part_num'] == 1:
+            smpp_messages[udh['csms_ref']]=[]
+
+        log.debug('Part %s of %s' % (udh['part_num'], udh['parts']))
+        smpp_messages[udh['csms_ref']].append(pdu.short_message[_start:])
+
+        if udh['part_num'] == udh['parts']:
+            _final = ''.join(smpp_messages[udh['csms_ref']])
+            smpp_messages[udh['csms_ref']] = None
+            return _final
+
+        return False
+
+    except Exception as ex:
+        log.debug("UDHI: Other Exception: %s", str(ex))
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        log.debug(message)
+        return smpplib.consts.SMPP_ESME_RSYSERR
+
 def rx_deliver_sm(pdu):
     global smpp_messages
     if not isinstance(pdu, smpplib.command.DeliverSM):
@@ -92,40 +126,14 @@ def rx_deliver_sm(pdu):
     gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
     code2charset = {1:'GSM03.38', 2:'UTF-8', 4:'UTF-8', 8:'UTF-16BE'}
 
-    _start = 0
-    if _udhi:
-        try:
-            _udh_length = ord(pdu.short_message[:1])
-            _start = _udh_length+1
-            udh = parse_udh(pdu.short_message[:_udh_length+1])
-            if udh is False:
-                log.warning('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
-                return smpplib.consts.SMPP_ESME_ROK
-            '''
-            if udh['part_num'] == 1:
-                smpp_messages[udh['csms_ref']]=[]
-            log.debug('Part %s of %s' % (udh['part_num'], udh['parts']))
-            smpp_messages[udh['csms_ref']].append(pdu.short_message[_start:])
-            if udh['part_num'] == udh['parts']:
-                _final = ''.join(smpp_messages[udh['csms_ref']])
-                smpp_messages[udh['csms_ref']] = None
-                log.debug("Full SMS Message: %s" % _final.decode(code2charset[pdu.data_coding]))
-                #local_submit_one('LOCAL_TEST', pdu.destination_addr, _final.decode(code2charset[pdu.data_coding]))
-            '''
-        except Exception as ex:
-            log.debug("UDHI: Other Exception: %s", str(ex))
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            log.debug(message)
-            return smpplib.consts.SMPP_ESME_RSYSERR
-
     try:
-        log_msg = pdu.short_message[_start:].decode(code2charset[pdu.data_coding])
+        log_msg = pdu.short_message.decode(code2charset[pdu.data_coding])
     except UnicodeDecodeError as ex:
-        log_msg = binascii.hexlify(pdu.short_message[_start:])
         print str(ex)
+        log_msg = binascii.hexlify(pdu.short_message)
 
     log.debug("RX SMS: [ %s ]" % log_msg)
+
     if int(pdu.dest_addr_ton) == smpplib.consts.SMPP_TON_INTL:
         # We cannot deliver any SMS to SMPP_TON_INTL
         #return smpplib.consts.SMPP_ESME_RSYSERR
@@ -177,15 +185,33 @@ def rx_deliver_sm(pdu):
         if pdu.esm_class != 8:
             sms.save(pdu.source_addr, pdu.destination_addr, 'SMS_LOCAL')
         return smpplib.consts.SMPP_ESME_ROK
+
+    # SMS destination has a Webphone Prefix.
     if (hasattr(config, 'sip_central_ip_address') and
-            isinstance(config.sip_central_ip_address, list) and
-            config.sip_central_ip_address[0] == dest_ip):
-        log.info('--> RX SMS for Webphone(%s): %s ' %
-                  (pdu.user_message_reference, pdu.short_message))
+        isinstance(config.sip_central_ip_address, list) and
+        config.sip_central_ip_address[0] == dest_ip):
+
+        log.info('--> RX SMS(%s) for Webphone.', pdu.user_message_reference)
+
+        if _udhi:
+            try:
+                ret = multipart(pdu)
+                if not ret:
+                    # We Have not got all the parts yet.
+                    log.debug("Accepting Part: %s" % binascii.hexlify(pdu.short_message))
+                    return smpplib.consts.SMPP_ESME_ROK
+                else:
+                    log.debug("Full SMS Message: %s" % ret.decode(code2charset[pdu.data_coding]))
+                    pdu.short_message = ret
+            except UDHError:
+                # Just Accept and drop it.
+                return smpplib.consts.SMPP_ESME_ROK
+
         if sms.webphone_sms(pdu.source_addr, pdu.destination_addr, pdu.short_message, pdu.data_coding):
             return smpplib.consts.SMPP_ESME_ROK
         else:
             return smpplib.consts.SMPP_ESME_RSYSERR
+
     else:
         # Pass it off to the Queue. what to do here? send it to the remote site?
         # via rapi?
