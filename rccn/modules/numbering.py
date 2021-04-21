@@ -311,6 +311,24 @@ class Numbering:
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
 
+    def get_remote_name(self, msisdn):
+        site_ip = self.get_site_ip(msisdn)
+        try:
+            opener = urllib2.build_opener(urllib2.HTTPHandler)
+            request = urllib2.Request('http://%s:8085/subscriber/%s' % (site_ip, msisdn))
+            request.get_method = lambda: 'GET'
+            res = opener.open(request).read()
+            if res:
+                data = json.loads(res)
+                if type(data) == dict and data['status'] == 'failed':
+                    return False
+                if data[2]:
+                    return data[2]
+        except IOError:
+            log.error('Error connecting to site %s for %s' % (site_ip, msisdn))
+        except (KeyError, TypeError):
+            log.error('Bad data from site %s [%s]' % (site_ip, res))
+
     def get_site_ip(self, destination_number):
         siteprefix = destination_number[:6]
         return self.get_site_ip_hlr(siteprefix)
