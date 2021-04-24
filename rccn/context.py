@@ -595,17 +595,17 @@ class Context:
 
         log.info('INBOUND call progressing to: %s', subscriber_number)
         try:
-            if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
-                log.info('Send call to internal subscriber %s', subscriber_number)
-                self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
-                self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
-                if not self._check_inbound_roaming():
-                    self.bridge(subscriber_number)
-                    return True
-            else:
+            if not (self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11):
                 log.error('DID assigned but subscriber %s does not exist or is not authorized', subscriber_number)
                 self._play_error(subscriber_number)
                 return False
+
+            log.info('Send call to internal subscriber %s', subscriber_number)
+            self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
+            self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
+            if not self._check_inbound_roaming():
+                return self.bridge(subscriber_number)
+
         except SubscriberException as _ex:
             log.error(_ex)
             self.session.execute('playback', self.WRONG_NUMBER)
@@ -646,11 +646,11 @@ class Context:
                 # if yes send call to local context outbound
                 # FIXME: we should never exec this code.
                 log.info('?? WTF! ?? Caller is found to be roaming on home site, send call to voip provider')
-                self.outbound()
-            else:
-                log.info('Send call to home_bts %s of roaming user', site_ip)
-                self.session.setVariable('context', 'ROAMING_OUTBOUND')
-                self.bridge(self.destination_number)
+                return self.outbound()
+
+            log.info('Send call to home_bts %s of roaming user', site_ip)
+            self.session.setVariable('context', 'ROAMING_OUTBOUND')
+            return self.bridge(self.destination_number)
 
         if self.numbering.is_number_roaming(self.destination_number):
             # well destination number is roaming as well, send call to the current_bts where the subscriber is roaming
@@ -660,48 +660,55 @@ class Context:
                 self.session.setVariable('context', 'ROAMING_INTERNAL')
                 if site_ip == config['local_ip']:
                     self.session.setVariable('context', 'ROAMING_BOTH')
+                return self.bridge(self.destination_number)
+            except NumberingException as _ex:
+                log.error(_ex)
+                return False
+
+        # destination number is not roaming check if destination number is for local site
+        if (len(self.destination_number) == 11 and
+                self.numbering.is_number_local(self.destination_number)):
+            log.info('Called number is a local number')
+
+            if not self.subscriber.is_authorized(self.destination_number, 0):
+                self.session.execute('playback', self.NOT_AUTH)
+                self.session.hangup('OUTGOING_CALL_BARRED')
+                return False
+
+            # check if the call duration has to be limited
+            local_chans = self.get_chans(wan_ip_address)
+            self.session.consoleLog("notice", "There are %s local channels in use" % local_chans)
+            try:
+                limit = self.configuration.get_local_calls_limit()
+                if limit != False:
+                    if limit[0] == 1:
+                        log.info('Limit call duration to: %s seconds', limit[1])
+                        self.session.execute('set',
+                                             'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
+            except ConfigurationException as _ex:
+                log.error(_ex)
+            log.info('Send roaming call to local MNCC')
+            self.session.setVariable('context', 'ROAMING_LOCAL')
+            return self.bridge(self.destination_number)
+
+        # number is not local, check if number is internal
+        if (len(self.destination_number) == 11 and
+               self.numbering.is_number_internal(self.destination_number)):
+            # number is internal send call to destination site
+            try:
+                site_ip = self.numbering.get_site_ip(self.destination_number)
+                log.info('Send call to site IP: %s', site_ip)
+                self.session.setVariable('context', 'ROAMING_INTERNAL')
                 self.bridge(self.destination_number)
             except NumberingException as _ex:
                 log.error(_ex)
-        else:
-            # destination number is not roaming check if destination number is for local site
-            if (len(self.destination_number) == 11 and
-                    self.numbering.is_number_local(self.destination_number)):
-                log.info('Called number is a local number')
-                if self.subscriber.is_authorized(self.destination_number, 0):
-                    # check if the call duration has to be limited
-                    try:
-                        limit = self.configuration.get_local_calls_limit()
-                        if limit != False:
-                            if limit[0] == 1:
-                                log.info('Limit call duration to: %s seconds', limit[1])
-                                self.session.execute('set',
-                                                     'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
-                    except ConfigurationException as _ex:
-                        log.error(_ex)
-                    log.info('Send roaming call to local MNCC')
-                    self.session.setVariable('context', 'ROAMING_LOCAL')
-                    self.bridge(self.destination_number)
-                else:
-                    self.session.execute('playback', self.NOT_AUTH)
-                    self.session.hangup('OUTGOING_CALL_BARRED')
-            else:
-                # number is not local, check if number is internal
-                if len(self.destination_number) == 11 and self.numbering.is_number_internal(self.destination_number):
-                    # number is internal send call to destination site
-                    try:
-                        site_ip = self.numbering.get_site_ip(self.destination_number)
-                        log.info('Send call to site IP: %s', site_ip)
-                        self.session.setVariable('context', 'ROAMING_INTERNAL')
-                        self.bridge(self.destination_number)
-                    except NumberingException as _ex:
-                        log.error(_ex)
-                    return
-                if self.numbering.is_number_webphone(self.destination_number):
-                    self.webphone()
-                    return
-                else:
-                    # called number must be wrong, hangup call
-                    log.error("End of Dialplan with <%s> -> <%s>", self.calling_number, self.destination_number)
-                    self.session.execute('playback', '%s' % self.get_audio_file('SERVICE_UNAVAILABLE'))
-                    #self.session.hangup()
+            return
+
+        if self.numbering.is_number_webphone(self.destination_number):
+            self.webphone()
+            return
+
+        # called number must be wrong, hangup call
+        log.error("End of Dialplan with <%s> -> <%s>", self.calling_number, self.destination_number)
+        self.session.execute('playback', '%s' % self.get_audio_file('SERVICE_UNAVAILABLE'))
+        #self.session.hangup()
