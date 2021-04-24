@@ -472,7 +472,10 @@ class SMS:
                 snpi = smpplib.consts.SMPP_NPI_ISDN
             parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(unicode_text)
             smpp_client = smpplib.client.Client("127.0.0.1", 2775, 90)
-            smpplib.client.logger.setLevel('INFO')
+            if hasattr(smpplib.client, 'logger'):
+                smpplib.client.logger.setLevel('INFO')
+            else:
+                smpp_client.logger.setLevel('INFO')
             smpp_client.set_message_received_handler(lambda pdu: sms_log.info("Rcvd while sending (%s)", pdu.command))
             smpp_client.set_message_sent_handler(_smpp_rx_submit_resp)
             smpp_client.connect()
