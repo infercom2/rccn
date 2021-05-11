@@ -344,7 +344,7 @@ class Numbering:
             try:
                 site = riak_client.bucket('sites')
                 site_data = site.get(siteprefix)
-                if site_data.data['ip_address'] != None:
+                if (site_data is not None and site_data.data['ip_address'] is not None):
                     return site_data.data['ip_address']
                 else:
                     raise NumberingException('RK_DB Error no IP found for site %s' % site)
