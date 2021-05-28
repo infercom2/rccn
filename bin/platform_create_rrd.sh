@@ -2,6 +2,8 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
+. /home/rhizomatica/bin/vars.sh
+
 if [ ! -f $RHIZO_DIR/loadaverage.rrd ]; then
 rrdtool create $RHIZO_DIR/loadaverage.rrd --step 300 \
 DS:load1:GAUGE:600:0:U \
@@ -31,6 +33,16 @@ rrdtool create $RHIZO_DIR/temperature.rrd --step 300 \
 DS:temp:GAUGE:600:0:U \
 RRA:MAX:0.5:1:10080
 fi
+
+for bts_m in "${!BTS_MASTER[@]}" ; do
+  if [ ! -f $RHIZO_DIR/bts-$bts_m.rrd ]; then
+    rrdtool create $RHIZO_DIR/bts-$bts_m.rrd --step 300 \
+    'DS:amps:GAUGE:600:0:U' \
+    'RRA:AVERAGE:0.5:1:288' \
+    'RRA:MIN:0.5:1:8928' \
+    'RRA:MAX:0.5:1:8928'
+  fi
+done
 
 if [ ! -f $RHIZO_DIR/voltage.rrd ]; then
 rrdtool create $RHIZO_DIR/voltage.rrd --step 300 \

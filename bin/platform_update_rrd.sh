@@ -15,6 +15,16 @@ if [ -n "$temperature" ]; then
   rrdtool update $RHIZO_DIR/temperature.rrd N:$temperature
 fi
 
+echo ${!BTS_MASTER[@]} > /var/rhizomatica/rrd/mybts_M
+
+for bts_m in "${!BTS_MASTER[@]}" ; do
+  bts_amps=`ssh -q -t -o StrictHostKeyChecking=no root@${BTS_MASTER[$bts_m]} sbts2050-util sbts2050-pwr-status | grep Main | cut -d' ' -f6`
+  if [ -n "$bts_amps" ]; then
+    /usr/bin/rrdtool update $RHIZO_DIR/bts-$bts_m.rrd N:$bts_amps
+    $bts_amps=
+  fi
+done
+
 linev=`/sbin/apcaccess status 2>/dev/null | grep LINEV | head -1 | awk '{print $3}'`
 if [ -n "$linev" ]; then
   /usr/bin/rrdtool update $RHIZO_DIR/voltage.rrd N:$linev

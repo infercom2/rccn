@@ -32,10 +32,21 @@ require_once('include/menu.php');
                                   for ($i=0;$i<6;$i++) { array_push($mybts,$i); }
 				}
 				
+				if (file_exists('/var/rhizomatica/rrd/mybts_M')) {
+				  $mybts_m=explode(' ',file_get_contents('/var/rhizomatica/rrd/mybts_M'));
+				} else {
+				  $mybts_m=array();
+                                  for ($i=0;$i<6;$i++) { array_push($mybts_m,$i); }
+				}
+
                                 foreach ($mybts as $i) {
 				  array_push($graphs,"chans-".$i);
 				}
-				
+
+				foreach ($mybts_m as $i) {
+				  array_push($graphs,"bts_amps-".$i);
+				}
+
 				array_push($graphs,  'broken','lur','sms','hlr_onlinereg','hlr_onlinenoreg');
 				foreach ($graphs as &$g) {
 					echo "<img src='graphs/$g-$age.png' /><br/><br/>";

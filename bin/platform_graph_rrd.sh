@@ -2,6 +2,8 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
+. /home/rhizomatica/bin/vars.sh
+
 AGES="12h 1d 1w 1m"
 
 for age in $AGES; do
@@ -85,6 +87,17 @@ rrdtool graph $RHIZO_DIR/graphs/cpu-$age.png --start -$age -aPNG -w 600 -l 0 -u 
   GPRINT:avgI:"Avg %6.2lf%%\n"
 
 rrdtool graph $RHIZO_DIR/graphs/temperature-$age.png --start -$age -aPNG --slope-mode -w 600 -t "Temperature" --vertical-label "temperature (°C)" DEF:temp1=$RHIZO_DIR/temperature.rrd:temp:MAX LINE1:temp1#ff0000:"Temperature"
+
+for bts_m in "${!BTS_MASTER[@]}" ; do
+_w=$(bname $bts_m)
+rrdtool graph $RHIZO_DIR/graphs/bts_amps-$bts_m-$age.png --start -$age -aPNG -w 600 -l 80 -u 160 --vertical-label='Amps' -t "$_w Main Current" \
+DEF:min=$RHIZO_DIR/bts-$bts_m.rrd:amps:MIN \
+DEF:max=$RHIZO_DIR/bts-$bts_m.rrd:amps:MAX \
+VDEF:curV=max,LAST \
+LINE1:min#0000AA:"Minimum Amps" \
+LINE1:max#00AA00:"Maximum Amps" \
+GPRINT:curV:"Current\: %3.0lf %s"
+done
 
 rrdtool graph $RHIZO_DIR/graphs/voltage-$age.png --start -$age -aPNG -w 600 -l 80 -u 160 --vertical-label='Volts' -t "Line Voltage" \
 DEF:min=$RHIZO_DIR/voltage.rrd:voltage:MIN \
