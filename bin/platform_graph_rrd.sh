@@ -90,7 +90,7 @@ rrdtool graph $RHIZO_DIR/graphs/temperature-$age.png --start -$age -aPNG --slope
 
 for bts_m in "${!BTS_MASTER[@]}" ; do
 _w=$(bname $bts_m)
-rrdtool graph $RHIZO_DIR/graphs/bts_amps-$bts_m-$age.png --start -$age -aPNG -w 600 -l 1 -u 3 --vertical-label='Amps' -t "$_w Main Current" \
+rrdtool graph $RHIZO_DIR/graphs/bts_amps-$bts_m-$age.png --start -$age -aPNG -w 600 -l 2 -u 2 --vertical-label='Amps' -t "$_w Main Current" \
 DEF:min=$RHIZO_DIR/bts-$bts_m.rrd:amps:MIN \
 DEF:max=$RHIZO_DIR/bts-$bts_m.rrd:amps:MAX \
 VDEF:curV=max,LAST \
