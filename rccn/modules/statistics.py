@@ -64,9 +64,11 @@ class LiveStatistics:
         data['c']=self.get_fs_calls(fs_con)
         data['gw']=self.get_fs_status(fs_con)
         data['trx']=self.get_trxOK()
+        data['ip']=self.get_IP()
         data['etrx']=self.get_configured_trx()
         data['ns']=self.get_gprs_ns()
         data['pdp']=self.get_pdp_contexts()
+        data['mm']=self.get_mm_contexts()
         if 'dids' in globals():
             data['dids']=dids
         fs_con.disconnect()
@@ -270,6 +272,13 @@ class LiveStatistics:
                 return -1
         return 0
 
+    def get_IP(self):
+        try:
+            with open('/tmp/my_ip', 'r') as f:
+                return f.read()
+        except IOError:
+            return ''
+
     def get_trxOK(self):
         try:
             with open('/tmp/trxOK', 'r') as f:
@@ -287,6 +296,13 @@ class LiveStatistics:
     def get_pdp_contexts(self):
         try:
             with open('/tmp/pdp_contexts', 'r') as f:
+                return f.readline()
+        except IOError:
+            return ''
+
+    def get_mm_contexts(self):
+        try:
+            with open('/tmp/mm_contexts', 'r') as f:
                 return f.readline()
         except IOError:
             return ''
