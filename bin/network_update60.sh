@@ -25,6 +25,10 @@ pdp=`pdpc`
 echo $pdp > /tmp/pdp_contexts
 rrdtool update $RHIZO_DIR/pdp_contexts.rrd N:$pdp
 
+mmc=`mmc`
+echo $mmc > /tmp/mm_contexts
+rrdtool update $RHIZO_DIR/mm_contexts.rrd N:$mmc
+
 for bts in $mybts ; do
   eval _channels_$bts=`echo "show bts $bts" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\// {gsub("\\\(|\\\)","",$3) split($3,a,"\\\/"); tch=a[1]}; /SDCCH/ { gsub("\\\(|\\\)","",$3) split($3,a,"\\\/"); sdcch+=a[1] } END {print tch":"sdcch}'`
 done
