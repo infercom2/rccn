@@ -68,7 +68,7 @@ class LiveStatistics:
         data['etrx']=self.get_configured_trx()
         data['ns']=self.get_gprs_ns()
         data['pdp']=self.get_pdp_contexts()
-        data['mm']=self.get_mm_contexts()
+        data['mmc']=self.get_mm_contexts()
         if 'dids' in globals():
             data['dids']=dids
         fs_con.disconnect()
