@@ -427,8 +427,11 @@ class SMS:
                 destination = s[0] + '+' + str(int(s[1]) + 1)
                 if int(s[1]) > 4:
                     sms_log.error("!! SMS is Looping(%s)", s[1])
-            values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding,
-                      'text': str_text, 'btext': '', 'dr': '', 'dcs': ''}
+
+            values = {'source': source, 'destination': destination,
+                      'charset': self.charset, 'coding': self.coding,
+                      'text': unicode_text, 'btext': '', 'dr': '', 'dcs': ''
+                      }
             data = urllib.urlencode(values)
             t = Thread(target=self._t_urlopen, args=(server, data))
             t.start()
