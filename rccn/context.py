@@ -185,7 +185,8 @@ class Context:
             ROAMING_LOCAL: A local/internal user is calling a local/foreign user that is here.
             """
             if 'lcls' in globals() and lcls == 1:
-                if _context == 'LOCAL' or _context == "ROAMING_LOCAL":
+                if _context == 'LOCAL': # or _context == "ROAMING_LOCAL":
+                    # TODO: Check which contexts are only local BTS calls.
                     self.session.setVariable('bypass_media_after_bridge', 'true')
 
             if _context == "INBOUND":
