@@ -29,6 +29,25 @@ margin-bottom:20px;
 border-bottom:solid 1px #b7ddf2;
 padding-bottom:10px;
 }
+
+.subscr_fields {
+	width: 100%;
+}
+
+.subscr_fields td {
+	width: 50%;
+}
+
+.subscr_fields label {
+	width: 160px !important;
+}
+
+#balance {
+	width: 60px !important;
+	font-weight: bold;
+	font-size: 15px !important;
+}
+
 #stylized label{
 display:block;
 font-weight:bold;
@@ -36,6 +55,7 @@ text-align:right;
 width:230px;
 float:left;
 }
+
 #stylized .small{
 color:#666666;
 display:block;
@@ -52,6 +72,10 @@ padding:4px 2px;
 border:solid 1px #aacfe4;
 width:200px;
 margin:5px 0 20px 10px;
+}
+
+.subscr_fields input[type='checkbox'] {
+	width: 10px !important;
 }
 
 #stylized input[type='checkbox'] {

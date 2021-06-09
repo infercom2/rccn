@@ -339,3 +339,8 @@ nav ul {
 	padding: 2px;
 	padding-right: 5px;
 }
+
+.debug {
+	color: black;
+	font-size: 18px;
+}

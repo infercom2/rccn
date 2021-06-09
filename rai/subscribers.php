@@ -47,7 +47,7 @@ $internalprefix = $info->postcode.$info->pbxcode;
                 "fnDrawCallback": function () {
                         $(".pop").fancybox({
                             'width'             : '50%',
-                            'height'            : '80%',
+                            'height'            : '90%',
                             'autoScale'         : false,
                             'type'              : 'iframe',
                             'onClosed'          : function() {
