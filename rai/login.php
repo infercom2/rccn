@@ -30,8 +30,8 @@ require_once('include/header.php');
 <?php
 	function print_form($post_data, $errors, $language) {
 		global $langcode;
-		$username = ($_POST['username'] != '') ? $_POST['username'] : '';
-		$password = ($_POST['password'] != '') ? $_POST['password'] : '';
+		$username = (isset($_POST['username'])) ? $_POST['username'] : '';
+		$password = (isset($_POST['password'])) ? $_POST['password'] : '';
 		$_code = array("es"=>'',"en"=>'');
 		$lcl_icon_file = 'img/'.$language."_".$langcode."_flag.png";
 		if (file_exists($lcl_icon_file)) {
