@@ -1,6 +1,5 @@
 <?
-	require_once('modules/access_manager.php');
-	
-	$access = new AccessManager();
-	$access->logout();
+require_once('modules/session.php');
+$sess = new Session();
+$sess->access->logout();
 ?>

@@ -3,14 +3,9 @@ include ("../lib/jpgraph/jpgraph.php");
 include ("../lib/jpgraph/jpgraph_bar.php");
 include ("../lib/jpgraph/jpgraph_date.php" );
 require_once('../modules/statistics.php');
-require_once('../modules/access_manager.php');
+require_once('../modules/session.php');
 
-$access = new AccessManager();
-$filename = basename($_SERVER['PHP_SELF']);
-if ($filename != "login.php") {
-        $access->checkAuth();
-}
-
+$sess = new Session();
 
 $period=$_GET['p'];
 try {

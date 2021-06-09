@@ -1,11 +1,12 @@
 <?php 
 
-require_once('include/menu.php'); 
-require_once('modules/access_manager.php');
+require_once('modules/session.php');
+$sess = new Session(true);
 	
-if(isset($_POST['access']) && $error_txt == "") {
-	$access = new AccessManager();
-	$access->login($_POST['username'],$_POST['password'],$_POST['language']);
+if(isset($_POST['access']) && !isset($error_txt)) {
+	if ($sess->access->login($_POST['username'],$_POST['password'],$_POST['language'])) {
+		return;
+	}
 }
 
 require_once('include/header.php');

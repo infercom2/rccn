@@ -1,11 +1,9 @@
 <?php
 
-require_once('modules/access_manager.php');
-	
-$access = new AccessManager();
-$filename = basename($_SERVER['PHP_SELF']);
-if ($filename != "login.php") {
-	$access->checkAuth();
+require_once('modules/session.php');
+
+if (!isset($sess)) {
+    $sess = new Session();
 }
 
 include('locale.php');

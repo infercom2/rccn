@@ -1,5 +1,33 @@
 <?php
 
+class Session {
+
+	public $access;
+
+	public function __construct($logging_in=false) {
+		if (session_id() == '') {
+			session_start();
+		}
+		$this->access = new AccessManager();
+		if (!$logging_in) {
+			$this->access->checkAuth();
+		}
+	}
+
+	function store($arr) {
+		foreach ($arr as $key => $val) {
+			if ($val == "" && isset($_SESSION[$key])) { // If it's empty, delete it.
+				unset($_SESSION[$key]);
+			}
+			if(is_array($val)) { # Don't trim an array!
+				$_SESSION[$key] = $val;
+			} else {
+				$_SESSION[$key] = trim($val);
+			}
+		}
+	}
+}
+
 class AccessManagerException extends Exception { }
 
 class AccessManager
@@ -16,25 +44,26 @@ class AccessManager
 		$this->lang = $lang;
 		if ($this->checkPwd($username,$password)) {
 			$this->initializeSession();
-			if (isset($_SESSION['login_goto_uri'])) {
-                            header('Location: '.$_SESSION['login_goto_uri']);
-                        } else {
-                            header('Location: subscribers.php');
-                        }
+			if (isset($_SESSION['login_goto_uri']) &&
+				  !strstr($_SESSION['login_goto_uri'], 'login.php')) {
+				header('Location: '.$_SESSION['login_goto_uri']);
+			} else {
+				header('Location: subscribers.php');
+			}
+			return true;
 		} else {
-			return;
-			header('Location: login.php');
+			return false;
 		}
 	}
 
 
 	public function checkPwd($username,$password) {
 		require_once(dirname(__FILE__).'/../include/database.php');
-       	        $db_conn = pg_connect(
-	        " host=".$DB_HOST.
-	        " dbname=".$DB_DATABASE.
-	        " user=".$DB_USER.
-	        " password=".$DB_PASSWORD);
+				$db_conn = pg_connect(
+			" host=".$DB_HOST.
+			" dbname=".$DB_DATABASE.
+			" user=".$DB_USER.
+			" password=".$DB_PASSWORD);
 		$result = pg_query("SELECT * from users WHERE username='".pg_escape_string($username)."'");
 		if (!$result) {
 			return false;
@@ -46,30 +75,27 @@ class AccessManager
 		} else {
 			$res = false;
 		}
-                pg_free_result($result);
-                pg_close($db_conn);
+				pg_free_result($result);
+				pg_close($db_conn);
 
 		return $res;
 	}
 
 
 	public function initializeSession() {
-		session_start();
 		$_SESSION['username'] = $this->username;
 		$_SESSION['lang'] = (strlen($this->lang) > 2 ) ? $this->lang.'.utf8' : $this->lang."_".strtoupper($this->lang);
 		$_SESSION['is_logged'] = 1;
 	}
 
 	public function checkAuth() {
-		session_start();
 		if (!isset($_SESSION['username']) && !isset($_SESSION['is_logged'])) {
-		        $_SESSION['login_goto_uri']=$_SERVER["REQUEST_URI"];
+				$_SESSION['login_goto_uri']=$_SERVER["REQUEST_URI"];
 			header('Location: login.php');
 		} 
 	}
 
 	public function logout() {
-		session_start();
 		unset($_SESSION['username']);
 		unset($_SESSION['lang']);
 		unset($_SESSION['is_logged']);
@@ -77,6 +103,5 @@ class AccessManager
 	}
 		
 }
-
 
 ?>

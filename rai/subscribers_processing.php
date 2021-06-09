@@ -3,13 +3,9 @@
     require_once('modules/configuration.php');
     require_once('include/database.php');
 
-    require_once('modules/access_manager.php');
+    require_once('modules/session.php');
 
-    $access = new AccessManager();
-    $filename = basename($_SERVER['PHP_SELF']);
-    if ($filename != "login.php") {
-        $access->checkAuth();
-    }
+    $sess = new Session();
 
     include('include/locale.php');
 
