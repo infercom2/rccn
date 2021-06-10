@@ -118,7 +118,7 @@ class SynchronousCtrlConnection(object):
         self._sock.send(payload)
 
         while True:
-            return_payload = self._sock.recv(8192)
+            return_payload = self._sock.recv(16384)
             return self._parse_for_id(return_payload, msg_id)
 
     def _parse_for_id(self, payload, sought_id):
