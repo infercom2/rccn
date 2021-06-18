@@ -253,10 +253,13 @@
                 /* Special output formatting for 'version' column */
                 $row[] = ($aRow[ $aColumns[$i] ]=="0") ? '-' : $aRow[ $aColumns[$i] ];
             }
-	    else if ( $aColumns[$i] == "msisdn" ) {
-            if ($aRow['current_bts'] == $aRow['home_bts']) {
-                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> " : "<img src='img/led-red.gif' /> ";
-            } else { 
+
+        else if ( $aColumns[$i] == "msisdn" ) {
+            if (($aRow['current_bts'] == $aRow['home_bts']) || $aRow["authorized"] != 1) {
+                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ?
+                        "<img src='img/led-green.gif' /> " :
+                        "<img src='img/led-red.gif' /> ";
+            } else {
                 $content =  (in_array($aRow[$aColumns[$i]],$roaming)) ? 
                  "<img title='"._('Roaming from')." ".$aRow['home_bts']."' src='img/led-roam.gif' /> " :
                  '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
@@ -264,18 +267,25 @@
                 "<img title='"._('Tagged as roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> ": '';
                 $content .= (!in_array($aRow[$aColumns[$i]],$roaming) && !in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? 
                 "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-roam.gif' /> " : '';
-
             }
             $content .= (in_array($aRow[$aColumns[$i]],$sip)) ? "<!--📞-->☎️ " : "";
             $content.= $aRow[$aColumns[$i]];
             $row[]=$content;
 	    }
+
 	    else if ( $aColumns[$i] == "authorized" ) {
-		    $content=($aRow[$aColumns[$i]] == 0) ? "<img src='img/lock.png' width='16' height='16' />" : "<img src='img/unlock.png' width='16' height='16' />";
-            $content.=($aRow[$aColumns[$i]] == 1 && $aRow['hlr_auth'] == 0 ) ? "<img title='"._('Not authorized on HLR!')."' src='img/lock.png' width='16' height='16' />" : "";
-            $content.=($aRow[$aColumns[$i]] == 0 && $aRow['hlr_auth'] == 1 ) ? "<img title='"._('Authorized on HLR!')."' src='img/unlock.png' width='16' height='16' />" : "";
-         $row[] = $content;
+		    $content=($aRow[$aColumns[$i]] == 0) ?
+                      "<img src='img/lock.png' width='16' height='16' />" :
+                      "<img src='img/unlock.png' width='16' height='16' />";
+            $content.=($aRow[$aColumns[$i]] == 1 && $aRow['hlr_auth'] == 0 ) ?
+                       "<img title='"._('Not authorized on HLR!')."' src='img/lock.png' width='16' height='16' />" :
+                       "";
+            $content.=($aRow[$aColumns[$i]] == 0 && $aRow['hlr_auth'] == 1 ) ?
+                       "<img title='"._('Authorized on HLR!')."' src='img/unlock.png' width='16' height='16' />" :
+                       "";
+            $row[] = $content;
 	    }
+
 	    else if ( $aColumns[$i] == "created" ) {
 		$row[] =  date('d-m-Y', strtotime($aRow[$aColumns[$i]]));
 	    }
