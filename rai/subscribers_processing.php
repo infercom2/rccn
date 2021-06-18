@@ -240,7 +240,7 @@
             !in_array($aRow['msisdn'],$sip) ) {
             continue;
         }
-        if ($rai_filter == 'RAI-all-roaming' && ($aRow['current_bts'] == $aRow['home_bts'] || $aRow['authorised'] != 1) ) {
+        if ($rai_filter == 'RAI-all-roaming' && ($aRow['current_bts'] == $aRow['home_bts'] || $aRow['authorized'] != 1) ) {
             continue;
         }
 
