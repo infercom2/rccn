@@ -121,7 +121,6 @@ def rx_alert_notification(pdu):
                     sub.update_location(imsi, extension, True)
                 except (config.SubscriberException, config.NoDataException) as ex:
                     log.debug('Subscriber error: %s', str(ex))
-                    return
 
                 # a riak exception in the previous
                 # function would prevent the local PG update.
