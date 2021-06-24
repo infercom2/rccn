@@ -5,8 +5,14 @@
 # So for a split stack we probably do not want to run this script.         #
 #                                                                          #
 
+. /etc/profile.d/rccn-functions.sh
+
 LOGFILE="/var/log/sms_cleanup.log"
 SMS_DB="/var/lib/osmocom/hlr.sqlite3"
+if [ "$OSMO_STACK" == "split" ] ;then
+SMS_DB=$OSMO_SMS
+fi
+
 SMS_DB_BKP="/home/rhizomatica/sms/hlr_`date '+%d%m%Y'`.sqlite3"
 
 function logc() {
