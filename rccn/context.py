@@ -418,6 +418,20 @@ class Context:
             self.session.execute('playback', '002_saldo_insuficiente.gsm')
             self.session.hangup()
 
+    def get_chans(self, search):
+        self.session.execute("set",
+            "_internalcount=${regex(${show channels like "+ search +
+            "}|/[^0-9]*([0-9]+) total./|%1)}")
+        count = self.session.getVariable('_internalcount')
+        try:
+            if count is None:
+                return 999
+            if count.decode().isnumeric():
+                return int(count)
+        except ValueError:
+            return 999
+
+
     def get_local_chans(self):
         self.session.execute("set",
             "_internalcount=${regex(${show channels like "+ mncc_ip_address +
