@@ -822,9 +822,13 @@ class Subscriber:
                 # There's no riak entry for this subscriber, add it.
                 self._provision_in_distributed_hlr(imsi, msisdn)
         except riak.RiakError as e:
-            raise SubscriberException('RK_HLR error: %s' % e)
+            # Just Return.
+            return
+            #raise SubscriberException('RK_HLR error: %s' % e)
         except socket.error:
-            raise SubscriberException('RK_HLR error: unable to connect')
+            return
+            #raise SubscriberException('RK_HLR error: unable to connect')
+
 
     def subscription(self, msisdn, status):
         # status 0 - subscription not paid
