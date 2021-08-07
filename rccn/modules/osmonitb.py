@@ -285,7 +285,8 @@ class OsmoNitb(object):
 
         subscriber_list = []
         for (imsi, msisdn) in connected:
-            subscriber_list.append({"imsi": imsi, "msisdn": msisdn})
+            if msisdn is not None:
+                subscriber_list.append({"imsi": imsi, "msisdn": msisdn})
 
         return subscriber_list
 
