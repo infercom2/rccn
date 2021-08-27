@@ -57,7 +57,7 @@ class SubscriberRESTService:
     @route('/')
     def getAll(self, request):
         api_log.info('%s - [GET] %s', request.getHost().host, self.path)
-        if request.getHeader('Origin').find("8080") > -1:
+        if (request.getHeader('Origin') and request.getHeader('Origin').find("8080") > -1):
             request.setHeader('Access-Control-Allow-Origin','*')
         try:
             sub = Subscriber()
