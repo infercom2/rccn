@@ -73,9 +73,6 @@ function print_form($post_data, $errors) {
         <label><?=_("All subscription not paid")?></label>
         <input type="checkbox" name="bulk_send[]" id="bulk_send_notpaid" value="notpaid"/><br/>
 
-        <label><?=_("All not registered (5 digits)")?></label>
-        <input type="checkbox" name="bulk_send[]" id="bulk_send_extension" value="extension"/><br/>
-
 	<button type="submit" name="send_sms"><?=_("Send SMS")?></button>
 	<div class="spacer"></div>
 	</form>

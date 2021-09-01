@@ -639,10 +639,6 @@ class SMS:
                 subscribers_list = sub.get_all_unauthorized(location)
             elif btype == 'notpaid':
                 subscribers_list = sub.get_all_notpaid(location)
-            elif btype == 'extension':
-                subscribers_list = sub.get_all_5digits()
-                # This last function returns list of tuples of 2
-                subscribers_list = [[0]+list(tup) for tup in subscribers_list]
             else:
                 subscribers_list = []
         except NoDataException as ex:
