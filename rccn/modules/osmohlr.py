@@ -100,10 +100,10 @@ class OsmoHlr(object):
         try:
             sq_hlr_cursor = sq_hlr.cursor()
             sql = ('SELECT subscriber.imei, subscriber.imsi, '
-                   'subscriber.msisdn, Subscriber.last_lu_seen '
+                   'subscriber.msisdn, subscriber.last_lu_seen '
                    'FROM subscriber '
                    'WHERE subscriber.imei=? '
-                   'ORDER BY subscriber.last_lu_seen DESC LIMIT 1;')
+                   'ORDER BY subscriber.id DESC LIMIT 1')
             sq_hlr_cursor.execute(sql, [imei])
             extensions = sq_hlr_cursor.fetchall()
             return extensions

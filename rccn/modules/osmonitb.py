@@ -113,7 +113,7 @@ class OsmoNitb(object):
                    'WHERE EquipmentWatch.equipment_id=Equipment.id '
                    'AND EquipmentWatch.subscriber_id=Subscriber.id '
                    'AND Equipment.imei=? '
-                   'ORDER BY Subscriber.updated DESC LIMIT 1;')
+                   'ORDER BY EquipmentWatch.updated DESC LIMIT 1;')
             print(sql)
             sq_hlr_cursor.execute(sql, [(imei)])
             extensions = sq_hlr_cursor.fetchall()
