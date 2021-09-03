@@ -9,6 +9,14 @@
 
     include('include/locale.php');
 
+    function remote_name($msisdn) {
+        # Rapi will cache remote names.
+        $path = "http://localhost:8085/subscriber/name/".$msisdn;
+        $response = \Httpful\Request::get($path)->expectsJson()->send();
+        $msisdn = $response->body;
+        return $msisdn;
+    }
+
     $rai_filter='';
 
     /*
@@ -172,7 +180,7 @@
 
     $sQuery.= "
     UNION SELECT created, created AS subscription_date, authorized AS subscription_status,
-    authorized AS authorized, msisdn, '"._('Roaming User')."' AS name, NULL AS balance,
+    authorized AS authorized, msisdn, '' AS name, NULL AS balance,
     '' AS location, created AS hlr_created,
     authorized AS hlr_auth, current_bts, home_bts FROM hlr ".$rWhereSql;
     }
@@ -294,6 +302,14 @@
 	    }
 	    else if ( $aColumns[$i] == "subscription_status") {
 		$row[] =  ($aRow[$aColumns[$i]] == 0) ? "<font color='red'>"._('NOT_PAID')."</font>" : "<font color='green'>"._('PAID')."</font>";
+            }
+            else if ( $aColumns[$i] == "name" ) {
+                if ($aRow["name"] != "") {
+                        $row[] = $aRow[ $aColumns[$i] ];
+                } else {
+                        $_rn = remote_name($aRow["msisdn"]);
+                        $row[] = ($_rn == '') ? _('Roaming User') : $_rn;
+                }
             }
             else if ( $aColumns[$i] != ' ' )
             {

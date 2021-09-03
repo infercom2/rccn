@@ -52,6 +52,7 @@ from modules.sms import (SMS, SMSException)
 
 class SubscriberRESTService:
     path = '/subscriber'
+    remote_names = {}
 
     # get all subscribers
     @route('/')
@@ -105,6 +106,23 @@ class SubscriberRESTService:
             api_log.debug(data)
 
         return data
+
+    @route('/name/<msisdn>')
+    def name(self, request, msisdn):
+        if msisdn in self.remote_names:
+            if (self.remote_names[msisdn][:2] == '__' and
+                (time.time() - float(self.remote_names[msisdn][2:])) < 600):
+                    return ''
+        sub = Subscriber()
+        rname = sub.get_name(msisdn)
+        if not rname:
+            self.remote_names[msisdn] = ''
+            return ''
+        if rname == '_timeout_':
+            self.remote_names[msisdn] = '__'+str(time.time())
+            return ''
+        self.remote_names[msisdn] = rname
+        return json.dumps(rname, cls=PGEncoder)
 
     # get msisdn
     @route('/extension/<imsi>')

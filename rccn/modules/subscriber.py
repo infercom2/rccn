@@ -37,6 +37,7 @@ from decimal import Decimal
 from modules.osmohlr import (OsmoHlr, OsmoHlrError)
 from modules.osmomsc import (OsmoMsc, OsmoMscError)
 from modules.osmonitb import (OsmoNitb)
+from modules.numbering import Numbering
 from ESL import ESLconnection
 
 class SubscriberException(Exception):
@@ -573,6 +574,22 @@ class Subscriber:
             return sub[0]
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+        finally:
+            cur.close()
+
+    def get_name(self, msisdn):
+        if msisdn[:6] != config['internal_prefix']:
+            return Numbering().get_remote_name(msisdn)
+        cur = self._open_local_cursor()
+        try:
+            cur.execute('SELECT name FROM subscribers WHERE msisdn = %(msisdn)s', {'msisdn': msisdn})
+            if cur.rowcount > 0:
+                sub = cur.fetchone()
+                return sub
+            else:
+                raise SubscriberException('PG_HLR No subscriber found')
+        except psycopg2.DatabaseError as e:
+            raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
         finally:
             cur.close()
 

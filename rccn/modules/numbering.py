@@ -317,15 +317,16 @@ class Numbering:
             opener = urllib2.build_opener(urllib2.HTTPHandler)
             request = urllib2.Request('http://%s:8085/subscriber/%s' % (site_ip, msisdn))
             request.get_method = lambda: 'GET'
-            res = opener.open(request).read()
+            res = opener.open(request, timeout=0.3).read()
             if res:
                 data = json.loads(res)
                 if type(data) == dict and data['status'] == 'failed':
                     return False
                 if data[2]:
                     return data[2]
-        except IOError:
-            log.error('Error connecting to site %s for %s' % (site_ip, msisdn))
+        except IOError as err:
+            log.error('Error [%s] connecting to site %s for %s' % (err, site_ip, msisdn))
+            return '_timeout_'
         except (KeyError, TypeError):
             log.error('Bad data from site %s [%s]' % (site_ip, res))
 
