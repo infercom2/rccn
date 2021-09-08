@@ -398,24 +398,27 @@ class Numbering:
             raise NumberingException('Database error getting subscriber number associated to the DID: %s' % e)
 
     def get_gateways(self, callee):
-        if not callee:
-            return []
         match = callee
-        if callee[0] == '+':
-            match = callee[1:]
-        if callee[0:2] == '00':
-            match = callee[2:]
+        sql = 'SELECT prefix, provider_name FROM providers ORDER by provider_name ASC'
+        if callee:
+            if callee[0] == '+':
+                match = callee[1:]
+            if callee[0:2] == '00':
+                match = callee[2:]
+            sql = 'SELECT prefix, provider_name FROM providers WHERE active = 1 ORDER by length(prefix) DESC'
         try:
             cur = db_conn.cursor()
-            cur.execute('SELECT * FROM providers WHERE active = 1 ORDER by length(prefix) DESC')
+            cur.execute(sql)
             all_gws = cur.fetchall()
             db_conn.commit()
         except psycopg2.DatabaseError, e:
             raise NumberingException('Database error getting a Gateway: %s' % e)
         gws = []
         for gw in all_gws:
-            gws.append([gw[2].strip(), gw[1].strip()])
+            gws.append([gw[0].strip(), gw[1].strip()])
             gws.sort(key=len, reverse=True)
+        if not callee:
+            return gws
         gws[:] = [x for x in gws if match.startswith(x[0])]
         return gws
 

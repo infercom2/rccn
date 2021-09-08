@@ -381,6 +381,11 @@ class Dialplan:
             self.play_announcement("SERVICE_UNAVAILABLE")
         return False
 
+    def check_engineer_codes(self):
+        self.context.eng_codes['profile'] = int(self.destination_number[1:2])
+        self.context.eng_codes['codec'] = int(self.destination_number[2:3])
+        return
+
     def lookup(self):
         """
         Dialplan processing to route call to the right context
@@ -391,6 +396,10 @@ class Dialplan:
 
         if self.destination_number == 'emergency':
             return self.check_emergency()
+
+        if re.findall("\*[0-9]{2}(\*|#)", self.destination_number[:4]):
+            self.check_engineer_codes()
+            self.destination_number = self.destination_number[4:]
 
         if self.destination_number[:1] == "*":
             return self.check_support()

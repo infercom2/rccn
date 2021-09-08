@@ -38,6 +38,7 @@ class Context:
         :param session: FS session
         :param modules: Array of modules instances to be used in the object
         """
+        self.eng_codes = {'profile': 0, 'codec': 0}
         self.session = session
         self.destination_number = self.session.getVariable('destination_number')
         self.calling_number = self.session.getVariable('caller_id_number')
@@ -68,6 +69,31 @@ class Context:
             "SERVICE_UNAVAILABLE"      : "016_oops.gsm"
         }.get(disposition, "016_oops.gsm")
 
+    def get_codec(self, default=''):
+        _override = self.eng_codes['codec']
+        codecs = ['', 'G729', 'PCMA', 'GSM', 'AMR', 'OPUS']
+        if _override >= len(codecs):
+            return ''
+        codec = codecs[_override]
+        if codec != '':
+            log.info('Forcing CODEC: %s', codec)
+            return codec
+        return default
+
+    def get_gateways(self, callee, default=''):
+        _override = self.eng_codes['profile']
+        if _override == 0:
+            if default:
+                return [['', default]]
+            return self.numbering.get_gateways(callee)
+        #gws = self.numbering.get_gateways
+        gws = [['', 'rhizomatica'], ['', 'rhizoextrtp'], ['', 'sems']]
+        gws.insert(0, ['',''])
+        if _override >= len(gws):
+            return ['', default]
+        log.info('Forcing Profile: %s', gws[_override][1])
+        return [gws[_override]]
+
     def bridge(self, callee):
         """ All calls that are progressing arrive here
             Avoids duplication of code
@@ -90,18 +116,20 @@ class Context:
         def add_local_ep():
             bridge_params = ',bridge_early_media=false'
             endpoint = 'sofia/internal/sip:' + str(callee) + '@' + mncc_ip_address + ':' + mncc_port
-            endpoints.append("[absolute_codec_string='^^:" + mncc_codec + "'" + bridge_params + "]" + endpoint)
+            codec = self.get_codec(mncc_codec)
+            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
 
         def add_sip_ep():
             sip_endpoint = self.numbering.is_number_sip_connected(self.session, callee)
             if sip_endpoint:
-                codec = 'PCMA:G729'
+                codec = self.get_codec('PCMA:G729')
                 endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + sip_endpoint)
 
         def add_internal_ep():
             endpoint = 'sofia/internalvpn/sip:' + str(callee) + '@' + str(site_ip) + ':' + inter_port
             bridge_params = ',bridge_early_media=true'
-            endpoints.append("[absolute_codec_string='^^:" + inter_codec + "'" + bridge_params + "]" + endpoint)
+            codec = self.get_codec(inter_codec)
+            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
 
         self.session.execute('set', "continue_on_fail="
                              "DESTINATION_OUT_OF_ORDER,"
@@ -144,9 +172,9 @@ class Context:
             except ConfigurationException as e:
                 log.error(e)
             '''
-            codec = 'G729'
+            codec = self.get_codec('G729')
             try:
-                gws = self.numbering.get_gateways(callee)
+                gws = self.get_gateways(callee)
                 if len(gws) is 0:
                     log.error('Error in getting a Gateway to use for the call')
                     self.session.execute('playback', '%s' % self.get_audio_file('INVALID_GATEWAY'))
@@ -157,9 +185,9 @@ class Context:
                 log.error(numex)
                 self.session.execute('playback', '%s' % self.get_audio_file('INVALID_GATEWAY'))
                 return False
+            bridge_params = ',sip_cid_type=pid'
             for gw in gws:
                 endpoint = 'sofia/gateway/' + gw[1] + '/' + str(callee) + '|'
-                bridge_params = ',sip_cid_type=pid'
                 endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
 
             if 'JB_out' in globals() and JB_out != '':
@@ -214,7 +242,7 @@ class Context:
                     add_internal_ep()
 
         if (_context == 'INTERNAL' or _context == 'ROAMING_INTERNAL'
-            or _context == "ROAMING_INBOUND" or _context == "ROAMING_BOTH"):
+                or _context == "ROAMING_INBOUND" or _context == "ROAMING_BOTH"):
             """
             INTERNAL:           A-leg: Call to another site.
             ROAMING_INTERNAL:   A-leg: Call from a roaming user (here), is to another roaming user.
@@ -265,11 +293,18 @@ class Context:
                 self.session.hangup('UNALLOCATED_NUMBER')
             self.session.execute('set', 'ringback=%(500,300,440,400);%(450,800,440,400)')
             self.session.execute('set', 'sip_h_Jitsi-Conference-Room=%s' % ("Room" + callee[-1:]))
-            codec = 'PCMA'
+            codec = self.get_codec('PCMA:OPUS')
             bridge_params = ''
-            gw = 'rhizomatica'
-            endpoint = 'sofia/gateway/' + gw + '/' + str(callee)
-            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+            gws = self.get_gateways(callee,'rhizomatica')
+            if len(gws) is 0:
+                log.error('Error in getting a Gateway to use for the call')
+                self.session.execute('playback', '%s' % self.get_audio_file('INVALID_GATEWAY'))
+                self.session.hangup('INVALID_GATEWAY')
+                return
+            log.debug('Use gateway(s): %s', gws)
+            for gw in gws:
+                endpoint = 'sofia/gateway/' + gw[1] + '/' + str(callee) + '|'
+                endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
 
         # Now bridge B-leg of call.
         log.info('Bridging to (%s) EP(s):', _context)
@@ -318,7 +353,7 @@ class Context:
             return True
 
         if (_context != "ROAMING_LOCAL" and _context != "ROAMING_BOTH" and
-            _context[:8] == "ROAMING_" and _orig_disp == "UNALLOCATED_NUMBER"):
+                _context[:8] == "ROAMING_" and _orig_disp == "UNALLOCATED_NUMBER"):
             # Don't play audio to an incoming roaming call for a number that is
             # unknown to OsmoHLR, this would kill any another bridge.
             # Also it might not be correct.
@@ -326,14 +361,14 @@ class Context:
             return
 
         if ((_context == "ROAMING_LOCAL" or _context == "ROAMING_BOTH") and
-            _orig_disp == "UNALLOCATED_NUMBER"):
+                _orig_disp == "UNALLOCATED_NUMBER"):
             log.debug("Forcing DESTINATION_OUT_OF_ORDER for UNALLOCATED_NUMBER")
             _orig_disp = "DESTINATION_OUT_OF_ORDER"
             _hup_cause = "DESTINATION_OUT_OF_ORDER"
 
         if (self.calling_host != mncc_ip_address and
-            (_context == "INTERNAL_INBOUND" or _context == "ROAMING_INTERNAL" or
-             _context == "ROAMING_LOCAL")):
+                (_context == "INTERNAL_INBOUND" or _context == "ROAMING_INTERNAL" or
+                 _context == "ROAMING_LOCAL")):
             log.debug("Not playing Audio to %s", self.calling_host)
             # Let the caller side deal with audio feedback
             self.session.hangup(str(_hup_cause))
@@ -420,8 +455,8 @@ class Context:
 
     def get_chans(self, search):
         self.session.execute("set",
-            "_internalcount=${regex(${show channels like "+ search +
-            "}|/[^0-9]*([0-9]+) total./|%1)}")
+                             "_internalcount=${regex(${show channels like "+ search +
+                             "}|/[^0-9]*([0-9]+) total./|%1)}")
         count = self.session.getVariable('_internalcount')
         try:
             if count is None:
@@ -434,8 +469,8 @@ class Context:
 
     def get_local_chans(self):
         self.session.execute("set",
-            "_internalcount=${regex(${show channels like "+ mncc_ip_address +
-            "}|/[^0-9]*([0-9]+) total./|%1)}")
+                             "_internalcount=${regex(${show channels like "+ mncc_ip_address +
+                             "}|/[^0-9]*([0-9]+) total./|%1)}")
         count = self.session.getVariable('_internalcount')
         try:
             if count is None:
@@ -484,11 +519,11 @@ class Context:
                     if limit[0] == 1:
                         log.info('Limit call duration to: %s seconds', limit[1])
                         self.session.execute('set',
-                                                 'execute_on_media=playback::tone_stream://%(100,50,650,500);loops=2 mux')
+                                             'execute_on_media=playback::tone_stream://%(100,50,650,500);loops=2 mux')
                         self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
                         self.session.execute('set',
                                              'execute_on_answer_2=sched_broadcast +%s playback::tone_stream://%%(200,50,650,500);loops=2' %
-                                              (limit[1] - 10))
+                                             (limit[1] - 10))
             except ConfigurationException as _ex:
                 log.error(_ex)
         log.info('Take it to the Bridge..')
@@ -708,7 +743,7 @@ class Context:
 
         # number is not local, check if number is internal
         if (len(self.destination_number) == 11 and
-               self.numbering.is_number_internal(self.destination_number)):
+                self.numbering.is_number_internal(self.destination_number)):
             # number is internal send call to destination site
             try:
                 site_ip = self.numbering.get_site_ip(self.destination_number)
