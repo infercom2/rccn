@@ -45,10 +45,10 @@ class Credit:
         sms = SMS();
         try:
             mysub = sub.get(msisdn)
+            current_balance = sub.get_balance(msisdn)
         except SubscriberException as e:
             raise CreditException(e)
 
-        current_balance = sub.get_balance(msisdn)
         new_balance = Decimal(str(credit)) + Decimal(str(current_balance))
 
         # update subscriber balance
