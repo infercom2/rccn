@@ -84,8 +84,10 @@ margin:5px 0 20px 10px;
 
 #stylized button{
 clear:both;
+display:block;
 margin-top: 15px;
-margin-left:150px;
+margin-left:auto;
+margin-right: auto;
 width:125px;
 height:31px;
 background-color: #E95C00;
@@ -112,4 +114,38 @@ font-weight:bold;
 
 .ac_loading {
 	background: white url('../img/loading_small.gif') right center no-repeat;
+}
+
+.add_credit_form {
+	width: 502px;
+}
+#stylized.add_credit_form label {
+	width: 190px;
+}
+.add_credit_form #subscriber_no {
+	width: 255px;
+	font-size: 18px;
+}
+.add_credit_form #amount {
+	width: 80px;
+	font-size: 20px;
+	color: blue;
+}
+.notice {
+	font-size: 18px;
+	font-weight: bold;
+	color: #00FA4ADB;
+	margin: 2px;
+}
+.notice_r {
+	font-size: 18px;
+	font-weight: bold;
+	color: #FA004ADB;
+	margin: 2px;
+}
+#form img {
+	filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+	position: relative;
+	top: 3px;
+	left: 1px;
 }

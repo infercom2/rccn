@@ -21,6 +21,17 @@ switch ($_REQUEST['service']) {
 		$cred = new Credit();
 		print $cred->get_credit_records($_REQUEST['year']);
 	break;
+	case "numbers":
+		require_once("modules/subscriber.php");
+		$sub = new Subscriber();
+		$data = $sub->search($_REQUEST['term']);
+		print '[ ';
+		foreach ($data as $key => $value) {
+			$s.='{ "label": "' .$value[0]." - ".$value[1]. '", "value": "'.$value[0].'" }, ';
+		}
+		print rtrim($s,', ');
+		print ' ]';
+	break;
 }
 
 ?>

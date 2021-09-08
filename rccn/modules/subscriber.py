@@ -178,6 +178,20 @@ class Subscriber:
         except OsmoHlrError as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
+    def get_msisdn_autocomplete(self, search=''):
+        cur = self._open_local_cursor()
+        try:
+            cur.execute('SELECT msisdn,name FROM subscribers WHERE msisdn LIKE %s',
+                        ('%'+search+'%', ))
+            if cur.rowcount > 0:
+                sub = cur.fetchall()
+                return sub
+            return []
+        except psycopg2.DatabaseError as e:
+            raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+        finally:
+            cur.close()
+
     def get_all(self):
         cur = self._open_local_cursor()
         try:

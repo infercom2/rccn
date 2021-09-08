@@ -344,3 +344,16 @@ nav ul {
 	color: black;
 	font-size: 18px;
 }
+
+.confirm {
+	width: 500px;
+	margin:0 auto;
+	text-align: center;
+	padding:14px;
+	line-height: 22px;
+}
+
+#stylized.confirm button {
+	display: unset;
+	margin-left: 30px;
+}

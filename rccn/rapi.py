@@ -236,6 +236,18 @@ class SubscriberRESTService:
         api_log.info(data)
         return data
 
+    # Get List of MSISDN for autocomplete
+    @route('/search/<search>')
+    def search(self, request, search):
+        api_log.info('%s - [GET] %s', request.getHost().host, self.path)
+        try:
+            sub = Subscriber()
+            data = json.dumps(sub.get_msisdn_autocomplete(search))
+        except SubscriberException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        api_log.debug(data)
+        return data
+
     # Get List of IMEI for autocomplete
     @route('/imei')
     def imei(self, request):

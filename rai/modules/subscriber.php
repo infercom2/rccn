@@ -80,6 +80,10 @@ class Subscriber
 		}
 	}
 
+	public function search($search) {
+		$data = \Httpful\Request::get($this->path."/search/".$search)->expectsJson()->send()->body;
+		return $data;
+	}
 
 	public function getAllConnected($type='gsm') {
 		try {
