@@ -207,7 +207,8 @@ class Numbering:
             return False
         # Try to avoid going to RIAK here
         cur = db_conn.cursor()
-        cur.execute('SELECT DISTINCT home_bts FROM hlr WHERE msisdn like %(prefix)s', {'prefix': siteprefix+'%'})
+        cur.execute("SELECT DISTINCT home_bts FROM hlr WHERE home_bts LIKE %(net)s"
+                    "AND msisdn LIKE %(prefix)s", { 'net': '10.23%', 'prefix': siteprefix+'%' })
         test = cur.fetchall()
         db_conn.commit()
         if len(test) > 1:
@@ -336,7 +337,8 @@ class Numbering:
 
     def get_site_ip_hlr(self, siteprefix):
         cur = db_conn.cursor()
-        cur.execute('SELECT DISTINCT home_bts FROM hlr WHERE msisdn like %(prefix)s', {'prefix': siteprefix+'%'})
+        cur.execute("SELECT DISTINCT home_bts FROM hlr WHERE home_bts LIKE %(net)s"
+                    "AND msisdn LIKE %(prefix)s", { 'net': '10.23%', 'prefix': siteprefix+'%' })
         result = cur.fetchall()
         db_conn.commit()
         if len(result) != 1:
