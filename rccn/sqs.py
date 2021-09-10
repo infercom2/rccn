@@ -168,7 +168,7 @@ try:
 
         try:
             last = datetime.strptime(expire_lu[dest], '%Y-%m-%d %X').replace(tzinfo=from_zone).astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
-        except KeyError:
+        except (TypeError, KeyError):
             last = 'UNKNOWN!'
             if cn.config['internal_prefix'] != dest[:6]:
                 try:
