@@ -35,8 +35,21 @@ logc "Cleanup DB"
 echo "DELETE from SMS where src_ton=5 and exists (select * from subscriber where subscriber.extension = sms.dest_addr AND subscriber.expire_lu < datetime('now', '-14 day') and subscriber.authorized = 0);" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
 echo "DELETE from SMS where created < datetime(\"now\", \"-6 hours\") and sent is not null;" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
 echo "DELETE from SMS where created < datetime(\"now\", \"-7 day\") and src_ton=5 and sent is null;" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
-if [[ $(date +%d) == "1" ]]; then
-  echo "DELETE from SMS where created < datetime(\"now\", \"-3 month\");" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
+
+if [ "$OSMO_STACK" != "split" ] && [[ $(date +%u) == 1 ]]; then
+	logc "running extra cleanup tasks"
+	# Delete any SMS older than 3 months where the destination subscriber does not exist anymore
+	echo "DELETE FROM SMS WHERE id IN
+	(SELECT sms.id from sms LEFT OUTER JOIN subscriber
+	ON (sms.dest_addr = subscriber.extension)
+	WHERE subscriber.extension IS NULL
+	AND sms.created < datetime('now', '-3 months'));" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
+	# Delete any SMS older than 6 months where the destination subscriber is not authorised.
+	echo "DELETE FROM SMS WHERE id IN
+	(SELECT sms.id from sms LEFT OUTER JOIN subscriber
+	ON (sms.dest_addr = subscriber.extension)
+	WHERE subscriber.authorized = 0 AND subscriber.expire_lu < datetime('now', '-6 months')
+	AND sms.created < datetime('now', '-6 months'));" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
 fi
 
 logc "DB size after cleanup: `ls -sh $SMS_DB | awk '{print $1}'`"
