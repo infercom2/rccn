@@ -88,6 +88,36 @@ def cleanup_hlrs():
     except psycopg2.DatabaseError as ex:
         hlrsync_log.exception(ex)
 
+    if use_nitb_osmo_stack == False:
+        return
+    hlrsync_log.info('Checking local HLR Subscribers..')
+    from modules import subscriber
+    from modules.osmonitb import (OsmoNitb)
+    prefix = config['internal_prefix']
+    sub = Subscriber()
+    nitb = OsmoNitb("127.0.0.1", 4242, sq_hlr_path)
+    try:
+        sq_hlr = sqlite3.connect(sq_hlr_path)
+        sq_hlr_cursor = sq_hlr.cursor()
+        sq_hlr_cursor.execute("SELECT imsi, extension FROM subscriber "
+                              "WHERE extension LIKE ? AND length(extension) = 11 AND authorized = 1",
+                              [(prefix+'%')])
+        osmo_hlr_subs = sq_hlr_cursor.fetchall()
+        sq_hlr.close()
+    except sqlite3.Error as ex:
+        sq_hlr.close()
+        print ('Sqlite error: %s' % ex.args[0])
+        return
+    try:
+        psql_subs = sub.get_all()
+    except SubscriberException as ex:
+        print ('Database error: %s' % ex.args[0])
+        return
+    for osmo_sub in osmo_hlr_subs:
+        if not [x for x in psql_subs if x[1] == str(osmo_sub[1])]:
+            hlrsync_log.info("Authorised osmo HLR subscriber: %s Not Found on RCCN Database", osmo_sub[1])
+            nitb.distributedable_access_by_msisdn(str(osmo_sub[1]))
+
 def hlr_sync(hours,until):
     try:
         rk_hlr = riak_client.bucket('hlr')
