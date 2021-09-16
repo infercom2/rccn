@@ -116,7 +116,7 @@ def cleanup_hlrs():
     for osmo_sub in osmo_hlr_subs:
         if not [x for x in psql_subs if x[1] == str(osmo_sub[1])]:
             hlrsync_log.info("Authorised osmo HLR subscriber: %s Not Found on RCCN Database", osmo_sub[1])
-            nitb.distributedable_access_by_msisdn(str(osmo_sub[1]))
+            nitb.disable_access_by_msisdn(str(osmo_sub[1]))
 
 def hlr_sync(hours,until):
     try:
