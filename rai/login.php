@@ -1,7 +1,10 @@
 <?php
 
 require_once('modules/session.php');
+require_once('modules/configuration.php');
 $sess = new Session(true);
+$site = new Configuration();
+$info = $site->getSite();
 	
 if(isset($_POST['access']) && !isset($error_txt)) {
 	if ($sess->access->login($_POST['username'],$_POST['password'],$_POST['language'])) {
@@ -29,7 +32,7 @@ require_once('include/header.php');
 
 <?php
 	function print_form($post_data, $errors, $language) {
-		global $langcode;
+		global $langcode, $info;
 		$username = (isset($_POST['username'])) ? $_POST['username'] : '';
 		$password = (isset($_POST['password'])) ? $_POST['password'] : '';
 		$_code = array("es"=>'',"en"=>'');
@@ -40,7 +43,7 @@ require_once('include/header.php');
 ?>
 <form action="login.php" method="post" id="newRequestForm">
 <fieldset class="formLogin">
-    <h2></h2>
+    <h2><?= $info->site_name ?> - <?= $info->network_name ?></h2>
     <div style='margin:auto; width:130px; color: red; font-size: 12px;'><?= nl2br($errors) ?></div><br/>
     <div>
         <label for="user_login"><?=_('Username:')?> &nbsp;</label>
