@@ -58,6 +58,21 @@ class OsmoHlr(object):
         # Do not access directly, use the _get_vty_connection(self) method
         self._cached_vty = None
 
+    def get_all_expire(self):
+        try:
+            sq_hlr = sqlite3.connect(self.hlr_db_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("SELECT msisdn,last_lu_seen FROM subscriber WHERE length(msisdn) = 11")
+            subscribers = sq_hlr_cursor.fetchall()
+            if subscribers == []:
+                raise NoDataException('No subscribers found')
+            else:
+                sq_hlr.close()
+                return subscribers
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise OsmoHlrError('SQ_HLR error: %s' % e.args[0])
+
     def get_msisdn_from_imsi(self, imsi):
         sq_hlr = _open_sqlite_connection(self.hlr_db_path)
         try:
