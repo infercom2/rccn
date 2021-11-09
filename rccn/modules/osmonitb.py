@@ -250,6 +250,13 @@ class OsmoNitb(object):
         subscriber_data = vty.command(cmd, close=True)
         return subscriber_data
 
+    def update_name(self, msisdn, new_name):
+        vty = self._get_vty_connection()
+        cmd = 'subscriber extension {} name {}'.format(
+            current_msisdn, new_name
+        )
+        vty.enabled_command(cmd, close=True)
+
     def update_msisdn(self, current_msisdn, new_msisdn):
         vty = self._get_vty_connection()
         cmd = 'subscriber extension {} extension {}'.format(
