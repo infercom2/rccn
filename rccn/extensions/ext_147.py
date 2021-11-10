@@ -52,6 +52,7 @@ def handler(session, *args):
     session.answer()
     session.execute('set_audio_level', 'write 4')
     sub = Subscriber()
+    last_bts = -1
     try:
         imsi = sub.get_imsi_from_msisdn(session.getVariable('caller_id_number'))
     except (SubscriberException, NoDataException):
@@ -80,24 +81,37 @@ def handler(session, *args):
             if not (num < 3 or (num % 12 == 0)):
                 continue
 
+            log.debug("Reading Meas Rep for %s [%s]", imsi, num)
+
             try:
                 bts_nr   = jdata['chan_info']['bts_nr']
                 trx_nr   = jdata['chan_info']['trx_nr']
                 ts_nr   = jdata['chan_info']['ts_nr']
                 ul_full = abs(jdata['meas_rep']['UL_MEAS']['RXL-FULL'])
-                dl_full = abs(jdata['meas_rep']['DL_MEAS']['RXL-FULL'])
                 ul_Q    = jdata['meas_rep']['UL_MEAS']['RXQ-FULL']
-                dl_Q    = jdata['meas_rep']['DL_MEAS']['RXQ-FULL']
-                pwr     = jdata['meas_rep']['L1_MS_PWR']
             except KeyError:
                 continue
 
-            log.debug("Reading Meas Rep for %s [%s]", imsi, num)
+            if bts_nr != last_bts:
+                session.execute('playback', 'tone_stream://%(50,20,750);loops=10')
+            last_bts = bts_nr
+
             if num < 3:
                 session.execute('say', 'en number pronounced %s' % bts_nr)
                 session.execute('say', 'en number pronounced %s' % trx_nr)
                 session.execute('say', 'en number pronounced %s' % ts_nr)
                 continue
+
+            try:
+                pwr     = jdata['meas_rep']['L1_MS_PWR']
+                dl_full = abs(jdata['meas_rep']['DL_MEAS']['RXL-FULL'])
+                dl_Q    = jdata['meas_rep']['DL_MEAS']['RXQ-FULL']
+            except KeyError:
+                session.execute('playback', 'tone_stream://%(100,50,650,500);loops=2')
+                session.execute('say', 'en number pronounced %s' % ul_full)
+                session.execute('say', 'en number pronounced %s' % ul_Q)
+                continue
+
             session.execute('say', 'en number pronounced %s' % ul_full)  
             session.execute('say', 'en number pronounced %s' % dl_full)
             session.execute('say', 'en number pronounced %s' % ul_Q)
@@ -105,5 +119,6 @@ def handler(session, *args):
             session.execute('say', 'en number pronounced %s' % pwr)
             #session.execute('playback', '$_ss')
     log.info("MEAS REP: stdout gone")
+    session.execute('playback', 'tone_stream://%(150,250,440);loops=10')
     proc.kill()
     session.hangup()
