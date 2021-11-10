@@ -131,7 +131,7 @@ class OsmoHlr(object):
         sq_hlr = _open_sqlite_connection(self.hlr_db_path)
         try:
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT id, msisdn FROM subscriber WHERE length(msisdn) = 5 ")
+            sq_hlr_cursor.execute("SELECT msisdn, imsi FROM subscriber WHERE length(msisdn) = 5")
             msisdns = sq_hlr_cursor.fetchall()
             return msisdns
         except sqlite3.Error as e:
