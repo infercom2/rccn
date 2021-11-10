@@ -52,12 +52,12 @@ if [ "$OSMO_STACK" != "split" ] && [[ $(date +%u) == 1 ]]; then
 	ON (sms.dest_addr = subscriber.extension)
 	WHERE subscriber.extension IS NULL
 	AND sms.created < datetime('now', '-3 months'));" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
-	# Delete any SMS older than 6 months where the destination subscriber is not authorised.
+	# Delete any SMS older than 4 months where the destination subscriber is not authorised.
 	echo "DELETE FROM SMS WHERE id IN
 	(SELECT sms.id from sms LEFT OUTER JOIN subscriber
 	ON (sms.dest_addr = subscriber.extension)
-	WHERE subscriber.authorized = 0 AND subscriber.expire_lu < datetime('now', '-6 months')
-	AND sms.created < datetime('now', '-6 months'));" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
+	WHERE subscriber.authorized = 0 AND subscriber.expire_lu < datetime('now', '-3 months')
+	AND sms.created < datetime('now', '-4 months'));" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
 fi
 
 logc "DB size after cleanup: `ls -sh $SMS_DB | awk '{print $1}'`"
