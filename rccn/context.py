@@ -256,7 +256,7 @@ class Context:
                 # FIXME: Again, we don't know if not exists or other error :(
                 log.error(ne)
             try:
-                if (not site_ip or site_ip == config['local_ip']):
+                if not site_ip or site_ip == config['local_ip']:
                     site_ip = self.numbering.get_site_ip(callee)
             except NumberingException as ne:
                 log.error(ne)

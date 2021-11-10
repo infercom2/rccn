@@ -295,7 +295,7 @@
 	    }
 
 	    else if ( $aColumns[$i] == "created" ) {
-		$row[] =  date('d-m-Y', strtotime($aRow[$aColumns[$i]]));
+	       $row[] =  date('d-m-Y', strtotime($aRow[$aColumns[$i]]));
 	    }
 	    else if ( $aColumns[$i] == "subscription_date") {
 		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));

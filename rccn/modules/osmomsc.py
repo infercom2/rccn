@@ -94,7 +94,7 @@ class CtrlNoResponseError(RuntimeError):
 class SynchronousCtrlConnection(object):
     """A simple osmo-ctrl connection receiver
 
-    This class is not multithread safe, and is not save to use with traps
+    This class is not multithread safe, and is not safe to use with traps
     enabled since its socket message parsing is very simplistic and could be
     thrown off by partial messages received concurrently over stream socket.
     """

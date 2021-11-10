@@ -22,7 +22,6 @@ RRA:MIN:0.5:10080:1 \
 RRA:MAX:0.5:10080:1
 fi
 
-
 if [ ! -f $RHIZO_DIR/bsc_channels.rrd ]; then
 rrdtool create $RHIZO_DIR/bsc_channels.rrd --step 300 \
 DS:tch:GAUGE:600:0:U \
@@ -65,7 +64,6 @@ RRA:MIN:0.5:10080:1 \
 RRA:MAX:0.5:10080:1
 fi
 
-
 if [ ! -f $RHIZO_DIR/stats.rrd ]; then
 rrdtool create $RHIZO_DIR/stats.rrd --step 300 \
 DS:cr:COUNTER:600:0:U \
@@ -101,5 +99,4 @@ RRA:MIN:0.5:1440:1 \
 RRA:MAX:0.5:1440:1 \
 RRA:MIN:0.5:10080:1 \
 RRA:MAX:0.5:10080:1
-
 fi

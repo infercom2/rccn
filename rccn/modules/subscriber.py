@@ -32,7 +32,8 @@ import socket
 import time
 from unidecode import unidecode
 
-from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, riak_client, RIAK_TIMEOUT, NoDataException, use_nitb_osmo_stack)
+from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, riak_client,
+                    RIAK_TIMEOUT, NoDataException, use_nitb_osmo_stack)
 from decimal import Decimal
 from modules.osmohlr import (OsmoHlr, OsmoHlrError)
 from modules.osmomsc import (OsmoMsc, OsmoMscError)

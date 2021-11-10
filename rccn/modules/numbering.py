@@ -316,7 +316,7 @@ class Numbering:
         site_ip = self.get_site_ip(msisdn)
         try:
             opener = urllib2.build_opener(urllib2.HTTPHandler)
-            request = urllib2.Request('http://%s:8085/subscriber/%s' % (site_ip, msisdn))
+            request = urllib2.Request('http://%s:8085/subscriber/%s' % (site_ip, msisdn), )
             request.get_method = lambda: 'GET'
             res = opener.open(request, timeout=0.3).read()
             if res:

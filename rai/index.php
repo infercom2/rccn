@@ -1,14 +1,14 @@
-<?php 
+<?php
 
 require_once('include/header.php');
-require_once('include/menu.php'); 
+require_once('include/menu.php');
 
-print_menu(); 
+print_menu();
 
 ?>
-			<br/><br/>
-			<div class="spacer"></div>
-		</div>
-	</body>
+		<br/><br/>
+		<div class="spacer"></div>
+	</div>
+</body>
 
 </html>
