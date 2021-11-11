@@ -925,7 +925,7 @@ class Subscriber:
             self._osmo_hlr.update_msisdn(msisdn, new_msisdn)
             self._osmo_hlr.enable_access_by_msisdn(new_msisdn)
             if use_nitb_osmo_stack:
-                self._osmo_hlr.update_name(msisdn, name)
+                self._osmo_hlr.update_name(msisdn, unidecode(name))
         except Exception as e:
             raise SubscriberException('SQ_HLR error provisioning the subscriber %s' % e)
 
@@ -938,7 +938,7 @@ class Subscriber:
                 'VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s,%(equipment)s)',
                 {
                     'msisdn': msisdn,
-                    'name': unidecode(name),
+                    'name': name,
                     'balance': Decimal(str(balance)),
                     'location': location,
                     'equipment': equipment
