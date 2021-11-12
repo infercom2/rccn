@@ -173,8 +173,8 @@ class Subscriber:
             if len(imeis) == 1:
                 data = self._osmo_hlr.get_msisdn_from_imei(imeis[0][0])
                 return data
-            else:
-                return imeis
+            return imeis
+
         except OsmoHlrError as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
