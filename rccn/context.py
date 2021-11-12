@@ -30,6 +30,8 @@ class Context:
     NOT_AUTH = '013_no_autorizado.gsm'
     NOT_REGISTERED = '015_no_access.gsm'
     WRONG_NUMBER = '007_el_numero_no_es_corecto.gsm'
+    BRIDGE_PARALLEL = ','
+    BRIDGE_SERIES = '|'
 
 
     def __init__(self, session, modules):
@@ -86,11 +88,10 @@ class Context:
             if default:
                 return [['', default]]
             return self.numbering.get_gateways(callee)
-        #gws = self.numbering.get_gateways
-        gws = [['', 'rhizomatica'], ['', 'rhizoextrtp'], ['', 'sems']]
+        gws = self.numbering.get_gateways('')
         gws.insert(0, ['',''])
         if _override >= len(gws):
-            return ['', default]
+            return [['', default]]
         log.info('Forcing Profile: %s', gws[_override][1])
         return [gws[_override]]
 
@@ -112,6 +113,7 @@ class Context:
         inter_port = '5040'
         endpoints = []
         bridge_params = ''
+        bridge_mode = self.BRIDGE_PARALLEL
 
         def add_local_ep():
             bridge_params = ',bridge_early_media=false'
@@ -149,12 +151,13 @@ class Context:
 
         # The default for hangup_after_bridge is false but no harm to have it here
         self.session.execute('set', 'hangup_after_bridge=false')
-        #self.session.execute('set', 'fail_on_single_reject=true')
+        self.session.execute('set', 'fail_on_single_reject=NO_ANSWER,USER_BUSY,CALL_REJECTED,ALLOTTED_TIMEOUT')
         # If we get early media, we'd ignore it.. (in case need late neg.)
         self.session.execute('set', 'ignore_early_media=false')
         # can we set the port?
         #self.session.execute('set', 'remote_media_port=60000')
         #self.session.execute('set', 'ringback=${us-ring}')
+        self.session.execute('set', 'originate_continue_on_timeout=true')
 
         # Defaults to sending the call to the local SIP to MNCC UA
         _context = self.session.getVariable('context')
@@ -173,9 +176,10 @@ class Context:
                 log.error(e)
             '''
             codec = self.get_codec('G729')
+            bridge_mode = self.BRIDGE_SERIES
             try:
                 gws = self.get_gateways(callee)
-                if len(gws) is 0:
+                if len(gws) is 0 or gws[0][1] == '':
                     log.error('Error in getting a Gateway to use for the call')
                     self.session.execute('playback', '%s' % self.get_audio_file('INVALID_GATEWAY'))
                     self.session.hangup('INVALID_GATEWAY')
@@ -187,8 +191,10 @@ class Context:
                 return False
             bridge_params = ',sip_cid_type=pid'
             for gw in gws:
-                endpoint = 'sofia/gateway/' + gw[1] + '/' + str(callee) + '|'
-                endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+                timeout = 14 if gw[1] == 'sems' else 6
+                endpoint = 'sofia/gateway/' + gw[1] + '/' + str(callee)
+                endpoints.append("[progress_timeout=" + str(timeout) + ","
+                                 "absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
 
             if 'JB_out' in globals() and JB_out != '':
                 self.session.execute('export', 'rtp_jitter_buffer_during_bridge=true')
@@ -310,7 +316,7 @@ class Context:
         log.info('Bridging to (%s) EP(s):', _context)
         for ep in endpoints:
             log.info('---> \033[92;1m%s\033[0m', ep)
-        bridge_str = ",".join(endpoints)
+        bridge_str = bridge_mode.join(endpoints)
         self.session.execute('bridge', bridge_str)
 
         # ============== AFTER THE BRIDGE ==============

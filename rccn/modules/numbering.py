@@ -405,7 +405,7 @@ class Numbering:
                 match = callee[1:]
             if callee[0:2] == '00':
                 match = callee[2:]
-            sql = 'SELECT prefix, provider_name FROM providers WHERE active = 1 ORDER by length(prefix) DESC'
+            sql = 'SELECT prefix, provider_name FROM providers WHERE active > 0 ORDER by length(prefix) DESC, active ASC'
         try:
             cur = db_conn.cursor()
             cur.execute(sql)
