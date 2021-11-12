@@ -79,9 +79,8 @@ class OsmoMsc(object):
         try:
             vty = obscvty.VTYInteract(self._vty_appstring, self._ip_address, self._vty_port)
             cmd = "subscriber extension {} expire".format(msisdn)
-            return_text = vty.enabled_command(cmd, close=True)
-            if return_text:
-                raise OsmoMscError("VTY cmd: `{}` returned: `{}`".format(cmd, return_text))
+            vty.enabled_command(cmd, close=True)
+
         except IOError:
             # TODO(matt9j) Log that communication failed with the MSC.
             pass
