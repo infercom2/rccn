@@ -104,7 +104,7 @@ class Context:
         else:
             mncc_codec = globals()['mncc_codec']
         if not 'inter_codec' in globals():
-            inter_codec = 'G729'
+            inter_codec = 'AMR'
         else:
             inter_codec = globals()['inter_codec']
 
