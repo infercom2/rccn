@@ -309,6 +309,19 @@ class LiveStatistics:
 
 class CallsStatistics:
 
+    def get_contexts_stats(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute("SELECT to_char(date_trunc('month',start_stamp),'YYYY-MM Month')"
+                        " AS d,context, count(id), round((sum(billsec)::decimal/60),2) AS minutes"
+                        " FROM cdr GROUP BY d,context "
+                        " ORDER BY d ASC")
+            data = cur.fetchall()
+            cur.close()
+            return data
+        except psycopg2.DatabaseError as e:
+            raise StatisticException('Database error: %s' % e)
+
     def get_total_calls(self):
         try:
             cur = db_conn.cursor()

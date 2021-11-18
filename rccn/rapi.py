@@ -652,6 +652,16 @@ class StatisticsRESTService:
         api_log.info(data)
         return data
     
+    @route('/calls/contexts',Http.GET)
+    def calls_contexts_stats(self, request):
+        api_log.info('%s - [GET] %s/calls/contexts', request.getHost().host, self.path)
+        try:
+            stats = CallsStatistics()
+            data = json.dumps(stats.get_contexts_stats(), cls=PGEncoder)
+        except StatisticException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return data
+
     @route('/calls/calls_context',Http.POST)
     def calls_context(self, request, period):
         api_log.info('%s - [POST] %s/calls/calls_context Data: period:"%s"', request.getHost().host, self.path, period)
