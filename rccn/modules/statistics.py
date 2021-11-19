@@ -314,7 +314,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute("SELECT to_char(date_trunc('month',start_stamp),'YYYY-MM Month')"
                         " AS d,context, count(id), round((sum(billsec)::decimal/60),2) AS minutes"
-                        " FROM cdr GROUP BY d,context "
+                        " FROM cdr WHERE billsec > 0 GROUP BY d,context " #HAVING context IN ('LOCAL','OUTBOUND','INBOUND')"
                         " ORDER BY d ASC")
             data = cur.fetchall()
             cur.close()
