@@ -37,10 +37,10 @@ if [ "$OSMO_STACK" == "nitb" ] ;then
 fi
 if [ "$OSMO_STACK" == "split" ] ;then
   # osmo-msc is lacking any simple subscriber count. Do this for the time being:
-  online_reg_subs=`echo "SELECT last_lu_seen FROM subscriber WHERE nam_cs = 1 AND last_lu_seen \
+  online_reg_subs=`echo "SELECT count(last_lu_seen) FROM subscriber WHERE nam_cs = 1 AND last_lu_seen \
                         IS NOT NULL and last_lu_seen > datetime('now', '-1 hour');" \
                         | sqlite3 -init <(echo .timeout 1000) /var/lib/osmocom/hlr.db`
-  online_noreg_subs=`echo "SELECT last_lu_seen FROM subscriber WHERE nam_cs = 0 AND last_lu_seen \
+  online_noreg_subs=`echo "SELECT count(last_lu_seen) FROM subscriber WHERE nam_cs = 0 AND last_lu_seen \
                         IS NOT NULL and last_lu_seen > datetime('now', '-1 hour');" \
                         | sqlite3 -init <(echo .timeout 1000) /var/lib/osmocom/hlr.db`
 fi
