@@ -365,7 +365,8 @@ class Numbering:
             if not callerid is None:
                 db_conn.commit()
                 return callerid[0]
-            if callee[0] == '+':
+            dest = callee
+            if (len(callee) > 0 and callee[0]) == '+':
                 dest = callee[1:2]
             if re.search(r'^00', callee) != None:
                 dest = callee[2:3]
@@ -375,7 +376,7 @@ class Numbering:
             if callerid == None:
                 cur.execute("SELECT callerid FROM dids,providers WHERE "
                             "providers.id = dids.provider_id AND "
-                            "providers.active = 1 ORDER BY dids.id asc LIMIT 1")
+                            "providers.active > 0 ORDER BY dids.id asc LIMIT 1")
                 callerid = cur.fetchone()
             db_conn.commit()
             if callerid != None:
@@ -425,7 +426,7 @@ class Numbering:
     def get_gateway(self):
         try:
             cur = db_conn.cursor()
-            cur.execute('SELECT provider_name FROM providers WHERE active = 1')
+            cur.execute('SELECT provider_name FROM providers WHERE active > 0')
             gw = cur.fetchone()
             db_conn.commit()
             if gw != None:
