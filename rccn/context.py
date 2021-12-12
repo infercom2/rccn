@@ -281,7 +281,7 @@ class Context:
             #self.session.execute('set', 'bridge_early_media=true')
             self.session.execute('set', 'ignore_early_media=false')
 
-            if _context == 'ROAMING_BOTH' or _context == 'ROAMING_INBOUND':
+            if _context != 'INTERNAL':
                 self.session.execute('set', 'ringback=${us-ring}')
                 add_local_ep()
                 #add_sip_ep()
