@@ -60,7 +60,7 @@ def handler(session, *args):
         session.hangup()        
 
     proc = Popen(["/usr/bin/ncat", "-U", "/tmp/json_socket"], stdout=PIPE, bufsize=1)
-
+    session.execute('playback', 'tone_stream://%(200,100,550,555);loops=2')
     with proc.stdout:
         for line in iter(proc.stdout.readline, b''):
             if not session.ready():
