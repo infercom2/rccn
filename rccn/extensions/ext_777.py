@@ -102,3 +102,5 @@ def handler(session, *args):
     except ResellerException as e:
         res_log.error('%s' % e)
         raise ExtensionException('Reseller could not be billed')
+
+    return 0

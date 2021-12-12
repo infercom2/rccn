@@ -149,8 +149,9 @@ def rx_deliver_sm(pdu):
         log.error("Unable to handle SMS from %s: %s" % (pdu.source_addr, ex))
         return smpplib.consts.SMPP_ESME_RINVSRCADR
     try:
-        if check_extensions(pdu):
-            return smpplib.consts.SMPP_ESME_ROK
+        ret = check_extensions(pdu, log_msg, _udhi)
+        if ret is not -1:
+            return ret
     except Exception as ex:
             log.error(str(ex))
             return smpplib.consts.SMPP_ESME_RSYSERR
@@ -228,17 +229,19 @@ def rx_deliver_sm(pdu):
             # Something bad happened
             return smpplib.consts.SMPP_ESME_RSYSERR
 
-def check_extensions(pdu):
+def check_extensions(pdu, unicode_text, udhi):
+        ''' Must return a valid SMPP Code if not negative '''
         if not pdu.destination_addr in config.extensions_list:
-            return False
+            return -1
         log.info('Destination number is a shortcode, execute shortcode handler')
         extension = config.importlib.import_module('extensions.ext_'+pdu.destination_addr, 'extensions')
         try:
             log.debug('Exec shortcode handler')
-            extension.handler('', pdu.source_addr, pdu.destination_addr, pdu.short_message)
-            return True
+            return extension.handler('', pdu.source_addr, pdu.destination_addr,
+                                     unicode_text, udhi)
         except config.ExtensionException as e:
             raise Exception('Receive SMS error: %s' % e)
+            return smpplib.consts.SMPP_ESME_RSYSERR
 
 def remote_pass_pdu(pdu, dest_ip):
 
