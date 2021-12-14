@@ -71,6 +71,47 @@ class Credit:
         finally:
             db_conn.commit()
 
+    def transfer(self, source, destination, amount):
+        '''
+            /* Transfer Credit from one account to Another.
+             * caller should verify data passed to this function */
+        '''
+        if type(amount) is not int or amount < 0:
+            return False
+
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT balance FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': source})
+            balance = cur.fetchone()[0]
+            cur.execute('SELECT balance FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': destination})
+            dest_balance = cur.fetchone()[0]
+        except (psycopg2.DatabaseError, TypeError) as db_err:
+            raise CreditException('PG_HLR getting balances for TX [%s:%s]: %s' % (source, destination, db_err))
+        finally:
+            cur.close()
+
+        if amount > balance:
+            return False
+
+        try:
+            cur = db_conn.cursor()
+            cur.execute('UPDATE subscribers SET balance = balance - %(amount)s WHERE msisdn=%(msisdn)s',
+                        {'amount': Decimal(amount), 'msisdn': source})
+            cur.execute('UPDATE subscribers SET balance = balance + %(amount)s WHERE msisdn=%(msisdn)s',
+                        {'amount': Decimal(amount), 'msisdn': destination})
+            cur.execute('INSERT INTO credit_history(msisdn,previous_balance,current_balance,amount)'
+                        ' VALUES(%s,%s,%s,%s)', (source, balance, balance-amount, -amount))
+            cur.execute('INSERT INTO credit_history(msisdn,previous_balance,current_balance,amount)'
+                        ' VALUES(%s,%s,%s,%s)', (destination, dest_balance, dest_balance+amount, amount))
+        except psycopg2.DatabaseError as db_err:
+            db_conn.rollback()
+            raise CreditException('PG_HLR error transferring balance: %s' % db_err)
+        finally:
+            db_conn.commit()
+            cur.close()
+
+        return True
+
     def add_to_reseller(self, msisdn, credit):
         reseller = Reseller()
         try:
