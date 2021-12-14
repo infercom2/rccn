@@ -32,8 +32,8 @@
 			<th align='left'><?= _("Invoice Number") ?></th>
 			<th align='left'><?= _("Reseller Number") ?></th>
 			<th align='left'><?= _("Previous Balance") ?></th>
-			<th align='left'><?= _("Amount Added") ?></th>
-			<th align='left'><?= _("Balance after Recharge") ?></th>
+			<th align='left'><?= _("Amount") ?></th>
+			<th align='left'><?= _("Balance after Operation") ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -47,8 +47,8 @@
                         <th align='left'><?= _("Invoice Number") ?></th>
                         <th align='left'><?= _("Reseller Number") ?></th>
                         <th align='left'><?= _("Previous Balance") ?></th>
-                        <th align='left'><?= _("Amount Added") ?></th>
-                        <th align='left'><?= _("Balance after Recharge") ?></th>
+                        <th align='left'><?= _("Amount") ?></th>
+                        <th align='left'><?= _("Balance after Operation") ?></th>
 		</tr>
 	</tfoot>
 </table>
