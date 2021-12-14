@@ -108,6 +108,9 @@ class Reseller:
             raise ResellerException('PG_HLR error deleting reseller: %s' % e)
 
     def edit(self, msisdn, pin, balance):
+        ''' This looks like some unfinished work in progress that should never be called '''
+        log_res.warn("Attempt to edit reseller.")
+        return False
         try:
             cur = db_conn.cursor()
             if balance != '':
