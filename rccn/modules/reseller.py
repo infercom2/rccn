@@ -230,8 +230,13 @@ class Reseller:
             raise ResellerException('Error in setting Reseller balance')
         
         try:
-            cur.execute('INSERT INTO resellers_credit_history(msisdn,previous_balance,current_balance) VALUES(%(r_msisdn)s,%(prev_balance)s,%(curr_balance)s)', 
-            {'r_msisdn': self.reseller_msisdn, 'prev_balance': Decimal(str(self.previous_balance)), 'curr_balance': Decimal(str(self.balance))})
+            cur.execute('INSERT INTO resellers_credit_history(msisdn,previous_balance,current_balance,amount)'
+                        ' VALUES(%(r_msisdn)s,%(prev_balance)s,%(curr_balance)s,%(amount)s)',
+                        {'r_msisdn': self.reseller_msisdn,
+                         'prev_balance': Decimal(str(self.previous_balance)),
+                         'curr_balance': Decimal(str(self.balance)),
+                         'amount': 0 - Decimal(str(amount))
+                        })
         except psycopg2.DatabaseError as e:
             db_conn.rollback()
             raise ResellerException('Error creating invoice for reseller: %s' % e)
