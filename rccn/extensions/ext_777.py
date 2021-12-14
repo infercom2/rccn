@@ -77,12 +77,18 @@ def handler(session, *args):
         reseller.add_subscriber_credit(amount)
         res_log.info('Amount of %s pesos successfully added to your account. New balance: %s' % (amount, reseller. subscriber_balance))
 
+        '''
+        / * The advice SMS to the receiver is sent from the credit module.
+          * add_subscriber_credit calls credit.add() which calls sms.send with
+          * the sms_credit_added message from config_values.py
+          * /
+
         mess4 = reseller.get_message(4)
-        if mess4 != None: 
+        if mess4 != None:
             mess4 = mess4.replace('[var1]', str(amount))
             mess4 = mess4.replace('[var2]', str(reseller. subscriber_balance))
             sms.send(config['smsc'], subscriber_msisdn, mess4)
-
+        '''
         mess5 = reseller.get_message(5)
         if mess5 != None:
             mess5 = mess5.replace('[var1]', str(amount))

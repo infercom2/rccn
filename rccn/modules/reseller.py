@@ -223,7 +223,8 @@ class Reseller:
             res_log.debug('Current subscriber balance: %s' % current_subscriber_balance)
             new_balance = Decimal(str(current_subscriber_balance)) + Decimal(str(amount))
             res_log.debug('New balance: %s' % new_balance)
-            credit.add(self.subscriber_msisdn, amount)  
+            # Credit.add will send SMS
+            credit.add(self.subscriber_msisdn, amount)
             self.subscriber_balance = new_balance
         except SubscriberException as e:
             raise ResellerException('Error getting subscriber balance: %s' % e)
