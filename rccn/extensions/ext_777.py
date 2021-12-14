@@ -43,7 +43,7 @@ def handler(session, *args):
         amount = text_data[2]
     except IndexError:
         mess = reseller.get_message(1)
-        if mess != None: 
+        if mess != None:
             sms.send(config['smsc'], reseller_msisdn, mess)
         raise ExtensionException('Invalid format')
 

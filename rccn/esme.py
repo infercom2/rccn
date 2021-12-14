@@ -148,16 +148,19 @@ def rx_deliver_sm(pdu):
     except SubscriberException as ex:
         log.error("Unable to handle SMS from %s: %s" % (pdu.source_addr, ex))
         return smpplib.consts.SMPP_ESME_RINVSRCADR
+
     try:
         ret = check_extensions(pdu, log_msg, _udhi)
         if ret is not -1:
             return ret
     except Exception as ex:
-            log.error(str(ex))
-            return smpplib.consts.SMPP_ESME_RSYSERR
+        log.error(str(ex))
+        return smpplib.consts.SMPP_ESME_RSYSERR
+
     if pdu.user_message_reference is None:
         log.warning("PDU has no user_message_reference.")
         pdu.user_message_reference = 0
+
     try:
         pdu.destination_addr = num.fivetoeleven(pdu.source_addr, pdu.destination_addr, log)
         dest_ip = num.get_current_bts(pdu.destination_addr)

@@ -8,7 +8,7 @@
 # it under the terms of the GNU Affero Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # RCCN is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -78,7 +78,7 @@ class Reseller:
                 raise ResellerException('PG_HLR messages found')
         except psycopg2.DatabaseError as e:
             raise ResellerException('PG_HLR error getting reseller messages: %s' % e)
-    
+
     def add(self, msisdn, pin, balance):
         # check if subscriber exists
         try:
@@ -90,7 +90,8 @@ class Reseller:
         # provision the reseller
         try:
             cur = db_conn.cursor()
-            cur.execute('INSERT INTO resellers(msisdn,pin,balance) VALUES(%(msisdn)s,%(pin)s,%(balance)s)', {'msisdn': msisdn, 'pin': pin, 'balance': Decimal(str(balance))})
+            cur.execute('INSERT INTO resellers(msisdn,pin,balance) VALUES(%(msisdn)s,%(pin)s,%(balance)s)',
+                        {'msisdn': msisdn, 'pin': pin, 'balance': Decimal(str(balance))})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
             raise ResellerException('PG_HLR error provisioning reseller: %s' % e)
@@ -105,15 +106,21 @@ class Reseller:
                 raise ResellerException('PG_HLR No reseller found')
         except psycopg2.DatabaseError as e:
             raise ResellerException('PG_HLR error deleting reseller: %s' % e)
-    
+
     def edit(self, msisdn, pin, balance):
         try:
             cur = db_conn.cursor()
             if balance != '':
-                cur.execute('UPDATE resellers SET msisdn=%(msisdn)s,pin=%(pin)s,balance=%(balance)s WHERE msisdn=%(msisdn2)s', {'msisdn': msisdn, 'name': name, 
-                'balance': Decimal(str(balance)), 'msisdn2': msisdn})
+                cur.execute('UPDATE resellers SET msisdn=%(msisdn)s,pin=%(pin)s,balance=%(balance)s'
+                            ' WHERE msisdn=%(msisdn2)s',
+                            {'msisdn': msisdn,
+                             'name': name,
+                             'balance': Decimal(str(balance)),
+                             'msisdn2': msisdn
+                            })
             else:
-                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,pin=%(pin)s WHERE msisdn=%(msisdn2)s', {'msisdn': msisdn, 'pin': pin, 'msisdn2': msisdn})
+                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,pin=%(pin)s WHERE msisdn=%(msisdn2)s',
+                            {'msisdn': msisdn, 'pin': pin, 'msisdn2': msisdn})
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
@@ -124,27 +131,30 @@ class Reseller:
     def edit_messages(self, mess1, mess2, mess3, mess4, mess5, mess6):
         try:
             cur = db_conn.cursor()
-            cur.execute('UPDATE resellers_configuration SET message1=%(mess1)s,message2=%(mess2)s,message3=%(mess3)s,message4=%(mess4)s,message5=%(mess5)s,message6=%(mess6)s',
-            {'mess1': mess1, 'mess2': mess2, 'mess3': mess3, 'mess4': mess4, 'mess5': mess5, 'mess6': mess6})
+            cur.execute('UPDATE resellers_configuration SET message1=%(mess1)s,message2=%(mess2)s,'
+                        'message3=%(mess3)s,message4=%(mess4)s,message5=%(mess5)s,message6=%(mess6)s',
+                        {'mess1': mess1, 'mess2': mess2,
+                         'mess3': mess3, 'mess4': mess4,
+                         'mess5': mess5, 'mess6': mess6
+                        })
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
                 raise ResellerException('Error configuring notification messages')
         except psycopg.DatabaseError as e:
             raise ResellerException('Error updating reseller notification messages: %s' % e)
-            
 
     def validate_data(self, pin):
         res_log.debug('Check PIN length')
         if len(pin) > 4 or len(pin) < 4:
             raise ResellerException('PIN invalid length')
-    
-    
+
         res_log.debug('Check if Reseller exists')
         # check if reseller exists in the database and the PIN is valid
         try:
             cur = db_conn.cursor()
-            cur.execute('SELECT msisdn,pin FROM resellers WHERE msisdn=%(msisdn)s', {'msisdn': str(self.reseller_msisdn)})
+            cur.execute('SELECT msisdn,pin FROM resellers WHERE msisdn=%(msisdn)s',
+                        {'msisdn': str(self.reseller_msisdn)})
             if cur.rowcount > 0:
                 res_log.debug('Valid Reseller found')
                 res_log.debug('Auth PIN')
@@ -158,7 +168,7 @@ class Reseller:
                     sub.get(self.subscriber_msisdn)
                 except SubscriberException as e:
                     raise ResellerException('Invalid subscriber')
-        
+
             else:
                 raise ResellerException('Invalid Reseller')
         except psycopg2.DatabaseError as e:
@@ -190,7 +200,6 @@ class Reseller:
         except psycopg2.DatabaseError as e:
             return None
 
-    
     def check_balance(self, amount):
         self.balance = self.get_balance()
         self.previous_balance = self.balance
@@ -199,7 +208,8 @@ class Reseller:
             res_log.info('Reseller doesn\'t have enough funds to add credit to the subscriber')
             raise ResellerException('Not enough funds to add the credit')
         else:
-            res_log.info('Reseller has enough balance %s, total balance after billing will be: %s' % (self.balance, balance_after_sale))
+            res_log.info('Reseller has enough balance %s, total balance after billing will be: %s',
+                         self.balance, balance_after_sale)
             self.balance = balance_after_sale
 
     def add_subscriber_credit(self, amount):
@@ -219,16 +229,19 @@ class Reseller:
             raise ResellerException('Error getting subscriber balance: %s' % e)
         except CreditException as e:
             raise ResellerException('Error adding credit to subscriber: %s' % e)
-    
+
     def bill(self, amount):
         try:
             cur = db_conn.cursor()
-            cur.execute('UPDATE resellers SET balance=%(balance)s, total_sales = total_sales + 1 WHERE msisdn = %(msisdn)s', 
-            {'balance': Decimal(str(self.balance)), 'msisdn': self.reseller_msisdn})
+            cur.execute('UPDATE resellers SET balance=%(balance)s, total_sales = total_sales + 1'
+                        ' WHERE msisdn = %(msisdn)s',
+                        {'balance': Decimal(str(self.balance)),
+                         'msisdn': self.reseller_msisdn
+                        })
         except psycopg2.DatabaseError as e:
             db_conn.rollback()
             raise ResellerException('Error in setting Reseller balance')
-        
+
         try:
             cur.execute('INSERT INTO resellers_credit_history(msisdn,previous_balance,current_balance,amount)'
                         ' VALUES(%(r_msisdn)s,%(prev_balance)s,%(curr_balance)s,%(amount)s)',
@@ -242,10 +255,13 @@ class Reseller:
             raise ResellerException('Error creating invoice for reseller: %s' % e)
 
         try:
-            cur.execute('INSERT INTO resellers_transactions(reseller_msisdn,subscriber_msisdn,amount) values(%(r_msisdn)s,%(s_msisdn)s,%(amount)s)', 
-            {'r_msisdn': self.reseller_msisdn, 's_msisdn': self.subscriber_msisdn, 'amount': Decimal(str(amount))})
+            cur.execute('INSERT INTO resellers_transactions(reseller_msisdn,subscriber_msisdn,amount)'
+                        ' VALUES(%(r_msisdn)s,%(s_msisdn)s,%(amount)s)',
+                        {'r_msisdn': self.reseller_msisdn, 's_msisdn': self.subscriber_msisdn,
+                         'amount': Decimal(str(amount))
+                        })
         except psycopg2.DatabaseError as e:
             db_conn.rollback()
             raise ResellerException('Error adding reseller subscriber credit history')
-        finally:    
+        finally:
             db_conn.commit()

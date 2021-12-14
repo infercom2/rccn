@@ -133,8 +133,9 @@ class Credit:
         # insert transaction into the credit history
         try:
             cur = db_conn.cursor()
-            cur.execute('INSERT INTO resellers_credit_history(msisdn,previous_balance,current_balance,amount) VALUES(%s,%s,%s,%s)', (msisdn, Decimal(str(current_balance)), 
-            Decimal(str(new_balance)), Decimal(str(credit))))
+            cur.execute('INSERT INTO resellers_credit_history(msisdn,previous_balance,current_balance,amount)'
+                        ' VALUES(%s,%s,%s,%s)',
+                        (msisdn, Decimal(str(current_balance)), Decimal(str(new_balance)), Decimal(str(credit))))
         except psycopg2.DatabaseError as e:
             db_conn.rollback()
             raise CreditException('PG_HLR error inserting reseller invoice in the history: %s' % e)
