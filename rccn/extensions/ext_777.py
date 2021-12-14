@@ -45,14 +45,14 @@ def handler(session, *args):
         mess = reseller.get_message(1)
         if mess != None:
             sms.send(config['smsc'], reseller_msisdn, mess)
-        raise ExtensionException('Invalid format')
+        raise ExtensionExceptionOK('Invalid format')
 
     if not pin or not subscriber_msisdn or not subscriber_msisdn.isdigit() or not amount or not amount.replace(".", "", 1).isdigit():
         # send notification invalid text format
         mess = reseller.get_message(1)
         if mess != None: 
             sms.send(config['smsc'], reseller_msisdn, mess)
-        raise ExtensionException('Invalid format')
+        raise ExtensionExceptionOK('Invalid format')
     
     res_log.info('Validate data')
     try:
@@ -62,7 +62,7 @@ def handler(session, *args):
     except ResellerException as e:
         mess = reseller.get_message(1)
         if mess != None: sms.send(config['smsc'], reseller_msisdn, mess)
-        raise ExtensionException('Invalid data: %s' % e)
+        raise ExtensionExceptionOK('Invalid data: %s' % e)
     
     try:
         reseller.check_balance(amount)
@@ -71,7 +71,7 @@ def handler(session, *args):
         mess3 = reseller.get_message(3)
         if mess2 != None: sms.send(config['smsc'], subscriber_msisdn, mess2)
         if mess3 != None: sms.send(config['smsc'], reseller_msisdn, mess3)
-        raise ExtensionException('Error: %s' % e)
+        raise ExtensionExceptionOK('Error: %s' % e)
 
     try:
         reseller.add_subscriber_credit(amount)
@@ -100,7 +100,7 @@ def handler(session, *args):
         if mess6 != None: 
             sms.send(config['smsc'], subscriber_msisdn, mess6)
             sms.send(config['smsc'], reseller_msisdn, mess6)
-        raise ExtensionException('General error credit could not be added: %s' % e)
+        raise ExtensionExceptionOK('General error credit could not be added: %s' % e)
 
     try:
         res_log.info('Bill reseller for %s pesos' % amount) 

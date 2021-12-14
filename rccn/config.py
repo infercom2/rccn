@@ -123,6 +123,8 @@ class NoDataException(Exception):
 # Extensions
 class ExtensionException(Exception):
     pass
+class ExtensionExceptionOK(Exception):
+    pass
 
 extensions_list = []
 os.chdir(rhizomatica_dir+'/rccn/extensions/')

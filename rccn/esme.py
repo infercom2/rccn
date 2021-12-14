@@ -154,8 +154,11 @@ def rx_deliver_sm(pdu):
         if ret is not -1:
             return ret
     except Exception as ex:
-        log.error(str(ex))
+        log.error("Extension module raises Error[%s], refusing SMS", str(ex))
         return smpplib.consts.SMPP_ESME_RSYSERR
+    except ExtensionExceptionOK as ex:
+        log.error("Extension module raises Error[%s], but sending OK to MS", str(ex))
+        return smpplib.consts.SMPP_ESME_ROK
 
     if pdu.user_message_reference is None:
         log.warning("PDU has no user_message_reference.")
@@ -243,8 +246,9 @@ def check_extensions(pdu, unicode_text, udhi):
             return extension.handler('', pdu.source_addr, pdu.destination_addr,
                                      unicode_text, udhi)
         except config.ExtensionException as e:
-            raise Exception('Receive SMS error: %s' % e)
-            return smpplib.consts.SMPP_ESME_RSYSERR
+            raise Exception('SMS Shortcode error: %s' % e)
+        except config.ExtensionExceptionOK:
+            raise
 
 def remote_pass_pdu(pdu, dest_ip):
 
