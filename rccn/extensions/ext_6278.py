@@ -36,7 +36,7 @@ def resp(sender, text):
 def handler(session, *args):
     log.debug('Handler for ext 6278')
     if session:
-        log.debug('Calls to Reseller shortcode rejected')
+        log.debug('Calls to SMS shortcode rejected')
         return False
 
     if args[1] != ME:
