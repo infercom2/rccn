@@ -46,6 +46,7 @@ num = Numbering()
 sms = SMS()
 sub = Subscriber()
 subs = Subscription(subscription_log)
+cred = Credit()
 
 print '-------\n\n - Welcome to the RCCN Shell\n - [TAB] completes\n'
 print ''' - Available modules:\n
