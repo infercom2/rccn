@@ -76,7 +76,8 @@ class Credit:
             /* Transfer Credit from one account to Another.
              * caller should verify data passed to this function */
         '''
-        if type(amount) is not int or amount < 0:
+        if type(amount) is not int or amount < 1:
+
             return False
 
         try:

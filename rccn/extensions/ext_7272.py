@@ -29,9 +29,13 @@ from smpplib import consts as smpp_c
 ME = '7272'
 
 def resp(sender, text):
-        sms = SMS()
-        sms.send(ME, sender, text)
-        del sms
+    sms = SMS()
+    sms.send(ME, sender, text)
+    del sms
+
+def abort(sender):
+    resp(sender, u'\U0001f641'.encode('utf-8') + " MENSAJE MALFORMADO")
+    return smpp_c.SMPP_ESME_ROK
 
 def handler(session, *args):
     log.debug('Handler for ext 7272')
@@ -45,15 +49,13 @@ def handler(session, *args):
     sub  = Subscriber()
     cred = Credit()
 
-    # Check to see if the calling number is authorised to do admin functions.
     if not sub.is_authorized(args[0], 0):
         sms_log.error('Credit transfer not allowed from [%s]', args[0])
         return smpp_c.SMPP_ESME_RINVSRCADR
 
     try:
         if not args[2]:
-            resp(args[0], "MENSAJE MALFORMADO")
-            return smpp_c.SMPP_ESME_ROK
+            return abort(args[0])
     
         text = args[2]
         log.info('[%s] sent us SMS: <%s>', args[0], text)
@@ -61,22 +63,25 @@ def handler(session, *args):
         command = text_data[0].upper()
 
         if not command == "PASA":
-            resp(args[0], "MENSAJE MALFORMADO")
-            return smpp_c.SMPP_ESME_ROK
+            return abort(args[0])
 
         amount      = text_data[1]
         destination = text_data[2]
 
     except IndexError:
-        resp(args[0], "ERROR")
+        return abort(args[0])
+
+    if not sub.is_authorized(destination, 0) or destination == args[0]:
+        sms_log.error('Credit transfer not allowed to [%s]', destination)
+        resp(args[0], "No se pudo pasar $%s a %s" % (amount, destination))
         return smpp_c.SMPP_ESME_ROK
 
     try:
-        ret = cred.transfer(args[0], destination, int(amount))
-        if not ret:
+        if not cred.transfer(args[0], destination, int(amount)):
             resp(args[0], "No se pudo pasar $%s a %s" % (amount, destination))
             return smpp_c.SMPP_ESME_ROK
-        resp(args[0], "Se ha pasado $%s a %s" % (amount, destination))
+
+        resp(args[0], "$%s pasado a %s con exito!" % (amount, destination))
         resp(destination, "Ud ha recibido $%s de %s" % (amount, args[0]))
     except Exception as exp:
         resp(args[0], "No se pudo pasar $%s a %s" % (amount, destination))
