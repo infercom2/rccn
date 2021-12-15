@@ -30,6 +30,7 @@ import sys, ESL, code, yaml
 sys.path.append("..")
 from config import *
 import xml.etree.ElementTree as ET
+from subprocess import check_output
 
 class StatisticException(Exception):
     pass
@@ -69,10 +70,18 @@ class LiveStatistics:
         data['ns']=self.get_gprs_ns()
         data['pdp']=self.get_pdp_contexts()
         data['mmc']=self.get_mm_contexts()
+        data['g']=self.get_rccn_revision()
         if 'dids' in globals():
             data['dids']=dids
         fs_con.disconnect()
         return data
+
+    def get_rccn_revision(self):
+        return check_output(['/usr/bin/git',
+                             '-C', '/var/rhizomatica/',
+                             'rev-parse',
+                             '--short=8',
+                             'HEAD'])
 
     def get_puppet_lr(self):
         try:
