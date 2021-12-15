@@ -267,7 +267,7 @@ class OsmoHlr(object):
     def delete_by_msisdn(self, msisdn):
         vty = self._get_vty_connection()
         cmd = 'subscriber msisdn {} delete'.format(msisdn)
-        vty.enabled_command(cmd, close=True)
+        return vty.enabled_command(cmd, close=True)
 
     def enable_access_by_msisdn(self, msisdn):
         self._set_access_by_msisdn(msisdn, "cs+ps")

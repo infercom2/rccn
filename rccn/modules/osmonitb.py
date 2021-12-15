@@ -195,6 +195,20 @@ class OsmoNitb(object):
             sq_hlr.close()
             raise OsmoHlrError('SQ_HLR error: %s' % e.args[0])
 
+    def get_all_5digits_inactive_since(self, days):
+        try:
+            sq_hlr = sqlite3.connect(self.hlr_db_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("SELECT extension FROM subscriber WHERE length(extension) = 5 "
+                                  "AND updated < date('now', '-%(days)s days')" %
+                                  { 'days': days })
+            inactive = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            return inactive
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise OsmoHlrError('SQ_HLR error: %s' % e.args[0])
+
     def get_all_inactive_msisdns_since(self, days, ignore_prefix):
         """Get all msisdns that have been inactive for :days:, ignoring those
         beginning with the :ignore_prefix:
@@ -267,7 +281,8 @@ class OsmoNitb(object):
     def delete_by_msisdn(self, msisdn):
         vty = self._get_vty_connection()
         cmd = 'subscriber extension {} delete'.format(msisdn)
-        vty.enabled_command(cmd, close=True)
+        # OsmoNitb has no output on success, but will on error.
+        return vty.enabled_command(cmd, close=True)
 
     def enable_access_by_msisdn(self, msisdn):
         vty = self._get_vty_connection()

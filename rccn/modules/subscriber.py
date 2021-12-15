@@ -30,6 +30,7 @@ import psycopg2
 import riak
 import socket
 import time
+import re
 from unidecode import unidecode
 
 from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, riak_client,
@@ -380,6 +381,14 @@ class Subscriber:
             return msisdns
         except OsmoMscError as e:
             raise SubscriberException('MSC error: %s' % e.args[0])
+
+    def get_all_5digits_inactive_since(self, days):
+        if not use_nitb_osmo_stack:
+            return []
+        try:
+            return self._osmo_hlr.get_all_5digits_inactive_since(days)
+        except OsmoHlrError as e:
+            raise SubscriberException('HLR error: %s' % e.args[0])
 
     def get_all_inactive_since(self, days):
         try:
@@ -806,11 +815,11 @@ class Subscriber:
         self._delete_in_distributed_hlr(msisdn)
 
     def purge(self, msisdn):
-        self._osmo_hlr.delete_by_msisdn(msisdn)
+        vty_out = self._osmo_hlr.delete_by_msisdn(msisdn)
+        return not bool(re.match(r"% No subscriber", vty_out))
 
     def print_vty_hlr_info(self, msisdn):
         return self._osmo_hlr.show_by_msisdn(msisdn)
-        
 
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled

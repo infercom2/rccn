@@ -19,11 +19,9 @@
 """
 rhizomatica inactive purger
 """
-
 from config import *
 
-DAYS_INACTIVE = 7
-
+DAYS_INACTIVE = 90
 
 def purge_inactive_subscribers():
     """
@@ -32,7 +30,7 @@ def purge_inactive_subscribers():
     """
     sub = Subscriber()
     try:
-        inactive = sub.get_all_inactive_since(DAYS_INACTIVE)
+        inactive = sub.get_all_5digits_inactive_since(DAYS_INACTIVE)
     except SubscriberException as e:
         purger_log.error(
             "An error ocurred getting the list of inactive: %s" % e)
@@ -41,11 +39,14 @@ def purge_inactive_subscribers():
     for msisdn in inactive:
         try:
             if msisdn != 10000:
-                sub.purge(msisdn)
-                purger_log.info("Subscriber %s purged" % msisdn)
+                if sub.purge(msisdn[0]):
+                    purger_log.info("Subscriber %s purged" % msisdn)
+                else:
+                    purger_log.info("Subscriber %s NOT purged" % msisdn)
         except SubscriberException as e:
             purger_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
 
 
 if __name__ == '__main__':
-    purge_inactive_subscribers()
+    if use_nitb_osmo_stack:
+        purge_inactive_subscribers()
