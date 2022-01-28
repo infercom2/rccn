@@ -120,6 +120,13 @@ class Numbering:
         '''
         return True
 
+    def remove_intl_prefix(self,destination_number):
+        _match = re.split(r'^(00|\+)(1|52)(1?)(.*)$',
+                          destination_number)
+        if len(_match) > 4 and len(_match[4]) == 10:
+            return _match[4]
+        return False
+
     def detect_mx_short_dial(self, destination_number):
         """
         Try to acertain if a mexican number dialled as
