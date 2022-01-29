@@ -11,11 +11,14 @@ done
 mybts=`echo "show bts" | nc -q1 localhost 4242 | grep ^BTS | awk '{ print $2 }'`
 echo $mybts > $RHIZO_DIR/mybts
 
-trx=`echo "show trx" | nc -q1 0 4242 | grep Baseband.*OK | wc -l`
-if [ "$trx" = "0" ] ; then
-	# For some reason, it can fail, if 0, try once more, avoid false negative.
-	trx=`echo "show trx" | nc -q1 0 4242 | grep Baseband.*OK | wc -l`
-fi
+trx=0
+tries=0
+# For some reason, it can fail, if 0, try a few times to avoid false negative.
+while [ $trx -eq 0 ] || [ $tries -gt 3 ] ; do
+	trx=`echo "show trx" | nc -q1 0 4242 | egrep '( |Carrier) NM State.*OK' | wc -l`
+	((tries=tries+1))
+done
+
 echo $trx > /tmp/trxOK
 
 ns=`ns | wc -l`
