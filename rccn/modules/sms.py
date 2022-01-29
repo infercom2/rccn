@@ -628,10 +628,11 @@ class SMS:
         vty.command(cmd)
 
     def broadcast_to_all_subscribers(self, text, btype, location):
-        sms_log.debug('Broadcast message to [%s], Location:%s' % (btype, location))
+        sms_log.debug('Broadcast message to [%s], Location: [%s]' % (btype, location))
         if location == "all":
             location = False
         sub = Subscriber()
+        _index = 1
         try:
             if btype == 'authorized':
                 subscribers_list = sub.get_all_authorized(location)
@@ -639,15 +640,18 @@ class SMS:
                 subscribers_list = sub.get_all_unauthorized(location)
             elif btype == 'notpaid':
                 subscribers_list = sub.get_all_notpaid(location)
+            elif btype == 'connected':
+                subscribers_list = sub.get_all_connected()
+                _index = 0
             else:
                 subscribers_list = []
         except NoDataException as ex:
             return False
 
         for mysub in subscribers_list:
-            self.send(config['smsc'], mysub[1], text)
+            self.send(config['smsc'], mysub[_index], text)
             time.sleep(1)
-            sms_log.debug('Broadcast message sent to [%s] %s' % (btype, mysub[1]))
+            sms_log.debug('Broadcast message sent to [%s] %s' % (btype, mysub[_index]))
 
     def send_broadcast(self, text, btype, location):
         sms_log.info('Send broadcast SMS to all subscribers. text: %s' % text)
