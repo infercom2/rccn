@@ -14,7 +14,7 @@ echo $mybts > $RHIZO_DIR/mybts
 trx=0
 tries=0
 # For some reason, it can fail, if 0, try a few times to avoid false negative.
-while [ $trx -eq 0 ] || [ $tries -gt 3 ] ; do
+while [ $trx -eq 0 ] && [ $tries -lt 3 ] ; do
 	trx=`echo "show trx" | nc -q1 0 4242 | egrep '( |Carrier) NM State.*OK' | wc -l`
 	((tries=tries+1))
 done
