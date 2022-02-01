@@ -144,12 +144,12 @@ class SubscriberRESTService:
     @route('/', Http.POST)
     def post(self, request, msisdn, name, balance, location, equipment):
         api_log.info(
-            '%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s equipment:"%s"',
-            request.getHost().host, self.path, msisdn, name, balance, location, equipment
+            '%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s equipment:"%s" package: "%s"',
+            request.getHost().host, self.path, msisdn, name, balance, location, equipment, package
         )
         try:
             sub = Subscriber()
-            num = sub.add(msisdn, name, balance, location, equipment)
+            num = sub.add(msisdn, name, balance, location, equipment, package)
             if num != msisdn:
                 data = {'status': 'success', 'error': num}
             else:
@@ -193,10 +193,10 @@ class SubscriberRESTService:
     # edit subscriber
     @route('/<msisdn>', Http.PUT)
     def put(self, request, msisdn='', name='', balance='', authorized='', 
-        subscription_status='', location='', equipment='', roaming=''):
+        subscription_status='', location='', equipment='', roaming='', package=''):
         api_log.info(
             '%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" ' 
-            'subscription_status:"%s" location:"%s" equipment:"%s" roaming:"%s"',
+            'subscription_status:"%s" location:"%s" equipment:"%s" roaming:"%s" package:"%s"',
             request.getHost().host,
             self.path,
             msisdn,
@@ -206,7 +206,8 @@ class SubscriberRESTService:
             subscription_status,
             location,
             equipment,
-            roaming
+            roaming,
+            package
         )
         try:
             sub = Subscriber()
@@ -215,7 +216,7 @@ class SubscriberRESTService:
             if  authorized != '':
                 sub.authorized(msisdn, authorized)
             if msisdn != '' and name != '' or balance != '':
-                sub.edit(msisdn, name, balance, location, equipment, roaming)
+                sub.edit(msisdn, name, balance, location, equipment, roaming, package)
             data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
@@ -767,6 +768,17 @@ class ConfigurationRESTService:
             if str(e) == "connection already closed":
                 api_log.debug("Exiting due to DB Error: %s", e)
                 os._exit(-1)
+        api_log.debug(data)
+        return data
+
+    @route('/packages', Http.GET)
+    def packages(self, request):
+        api_log.debug('%s - [GET] %s/packages', request.getHost().host, self.path)
+        try:
+            config = Configuration()
+            data = json.dumps(config.get_packages(), cls=PGEncoder)
+        except ConfigurationException as e:
+            data = {'status': 'failed', 'error': str(e)}
         api_log.debug(data)
         return data
 

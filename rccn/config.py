@@ -134,6 +134,9 @@ for f in files:
     ext_name = file_name.split('_')[1]
     extensions_list.append(ext_name)
 
+# With this code revision, the db MUST be at revision 14, regardless of what config_values might have.
+db_revision = '14'
+
 # initialize DB handler
 db_conn = None
 config = {}

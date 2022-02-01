@@ -36,10 +36,29 @@ function print_form($post_data, $errors, $sub) {
 	</label>
 	<input type="text" name="equipment" id="equipment" value="<?=$sub->equipment?>" />
 
+	<label><?=_("Package")?>
+	<span class="small"><?=_("Call Tarrif Scheme")?>
+	</span>
+	</label>
+
 <?
 try {
-	$loc = new Configuration();
-	$locations = $loc->getLocations();
+	$conf = new Configuration();
+	$packages = $conf->getPackages();
+} catch (ConfigurationException $e) {
+	echo "&nbsp;&nbsp;Error getting packages";
+}
+?>
+	<select name="package" id="package">
+<? foreach ($packages as $package) {
+	$sel = ($package->id === $sub->package) ? "selected='selected'" : ""; ?>
+		<option value="<?=$package->id?>" <?=$sel?> ><?=$package->name?></option>
+<? } ?>
+	</select>
+
+<?
+try {
+	$locations = $conf->getLocations();
 } catch (ConfigurationException $e) {
 	echo "&nbsp;&nbsp;Error getting locations";
 }
@@ -133,6 +152,7 @@ $authorized = (isset($_POST['authorized'])) ? $_POST['authorized'] : '0';
 $location = (isset($_POST['location'])) ? $_POST['location'] : '';
 $equipment = (isset($_POST['equipment'])) ? $_POST['equipment']: '';
 $roaming = (isset($_POST['roaming'])) ? $_POST['roaming'] : '0';
+$package = (isset($_POST['package'])) ? $_POST['package'] : '0';
 
 if ($firstname == '') {
 	$error_txt .= _("Name is empty")."<br/>";
@@ -150,7 +170,7 @@ echo "<center>";
 try {
 	#$sub->get($_POST['msisdn']);
 	$sub->set("", $callerid, $firstname, "", "", "", "",
-			  $location, $equipment, $roaming);
+			  $location, $equipment, $roaming, $package);
 
 	if ($_POST['authorized'] == 1) {
 		$sub->authorized = 1;

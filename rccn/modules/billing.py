@@ -169,8 +169,10 @@ class Billing:
             bill_log.info('===========================================================================')
             bill_log.info('OUTBOUND Context Bill subscriber %s destination %s' % (subscriber, destination_number))
 
+            sub = Subscriber()
             # get rate
             rate = self.get_rate(destination_number)
+            package = sub.get_package(subscriber)
             if 'charge_outbound_rate_type' in globals() and charge_outbound_rate_type == 'sec':
                 call_cost = Decimal(math.ceil((rate[3]/60)*duration * 100) / 100).quantize(Decimal('0.01'))
             else:
@@ -181,7 +183,6 @@ class Billing:
             session.setVariable('cost', str(call_cost))
             bill_log.info('Call duration: %d sec Call cost: %.2f' % (duration, call_cost))
             
-            sub = Subscriber()
             try:
                 previous_balance = sub.get_balance(subscriber)
                 current_balance = previous_balance - call_cost

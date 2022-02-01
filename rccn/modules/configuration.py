@@ -52,7 +52,23 @@ class Configuration:
                 return site_conf
         except psycopg2.DatabaseError as e:
             raise ConfigurationException('Database error getting site config: %s' % e)
-    
+
+    def get_packages(self):
+        try:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT * FROM packages')
+            packages = cur.fetchall()
+            db_conn.commit()
+            cur.close()
+            if packages != None and len(packages):
+                return packages
+            else:
+                return [{'id': 0, 'name': 'Cobro Normal', 'conf': ''}]
+        except psycopg2.DatabaseError as e:
+            db_conn.rollback()
+            log.debug('Database error getting packages: %s', e)
+            return [{'id': 0, 'name': 'Cobro Normal', 'conf': ''}]
+
     def get_locations(self):
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)

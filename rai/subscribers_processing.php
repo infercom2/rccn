@@ -36,7 +36,7 @@
     $aColumns = array( 'created', 'subscription_date', 'subscription_status', 'authorized', 'msisdn', 'name', 'balance', 'location' );
 
     /* Use a different set of columns to build the query. */
-    $aqColumns = array( 'subscribers.created AS created', 'subscribers.subscription_date AS subscription_date', 'subscription_status', 'subscribers.authorized AS authorized', 'subscribers.msisdn as msisdn', 'name', 'balance', 'location', 'hlr.created AS hlr_created', 'hlr.authorized AS hlr_auth', 'current_bts', 'home_bts' );
+    $aqColumns = array( 'subscribers.created AS created', 'subscribers.subscription_date AS subscription_date', 'subscription_status', 'subscribers.authorized AS authorized', 'subscribers.msisdn as msisdn', 'name', 'balance', 'location', 'package', 'hlr.created AS hlr_created', 'hlr.authorized AS hlr_auth', 'current_bts', 'home_bts' );
 
     /* Indexed column (used for fast and accurate table cardinality) */
     $sIndexColumn = "subscribers.id";
@@ -301,9 +301,12 @@
 		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
 	    }
 	    else if ( $aColumns[$i] == "subscription_status") {
-		$row[] =  ($aRow[$aColumns[$i]] == 0) ? "<font color='red'>"._('NOT_PAID')."</font>" : "<font color='green'>"._('PAID')."</font>";
-            }
-            else if ( $aColumns[$i] == "name" ) {
+		   $content = ($aRow[$aColumns[$i]] == 0) ? "<font color='red'>"._('NOT_PAID')."</font>" :
+                                                  "<font color='green'>"._('PAID')."</font>";
+            $content .= ($aRow['package'] == 1) ? "<span class='package-ind'> P</span>" : "";
+            $row[] = $content;
+        }
+        else if ( $aColumns[$i] == "name" ) {
                 if ($aRow["name"] != "") {
                         $row[] = $aRow[ $aColumns[$i] ];
                 } else {

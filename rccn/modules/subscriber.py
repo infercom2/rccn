@@ -85,6 +85,21 @@ class Subscriber:
         self._riak_client = riak_client
         self._riak_timeout = riak_timeout
 
+    def get_package(self, subscriber_number):
+        cur = self._open_local_cursor()
+
+        try:
+            cur.execute("SELECT package FROM subscribers WHERE msisdn = %(number)s", {'number': subscriber_number})
+            package = cur.fetchone()
+            if package is not None:
+                return package[0]
+            else:
+                raise SubscriberException("No Data getting subscriber package")
+        except psycopg2.DatabaseError as e:
+            raise SubscriberException('Database error in getting subscriber package: %s' % e)
+        finally:
+            cur.close()
+
     def get_balance(self, subscriber_number):
         # check if extension if yes add internal_prefix
         if len(subscriber_number) == 5:
@@ -649,7 +664,7 @@ class Subscriber:
         except OsmoMscError as e:
             raise SubscriberException("Expire LU exception: {}".format(e))
 
-    def add(self, msisdn, name, balance, location='', equipment=''):
+    def add(self, msisdn, name, balance, location='', equipment='', package = 0):
         if len(msisdn) == 15:
             # lookup extension by imsi
             extension = self.get_local_extension(msisdn)
@@ -667,7 +682,7 @@ class Subscriber:
                 # get a new extension
                 msisdn = self._get_new_msisdn(msisdn, name)
                 subscriber_number = config['internal_prefix'] + msisdn
-                self._provision_in_database(subscriber_number, name, balance, location, equipment)
+                self._provision_in_database(subscriber_number, name, balance, location, equipment, package)
             except SubscriberException as e:
                 # revert back the change on SQ_HLR
                 self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
@@ -675,7 +690,7 @@ class Subscriber:
         else:
             try:
                 self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
-                self._provision_in_database(subscriber_number, name, balance, location, equipment)
+                self._provision_in_database(subscriber_number, name, balance, location, equipment, package)
             except SubscriberException as e:
                 # revert back the change on SQ_HLR
                 self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
@@ -905,13 +920,14 @@ class Subscriber:
         finally:
             cur.close()
 
-    def edit(self, msisdn, name, balance, location, equipment, roaming):
+    def edit(self, msisdn, name, balance, location, equipment, roaming, package):
         parameter_set = {
             "name": name,
             "balance": balance,
             "location": location,
             "equipment": equipment,
-            "roaming": roaming
+            "roaming": roaming,
+            "package": package
         }
         _set = {col: value for col, value in parameter_set.items() if value != ""}
 
@@ -952,19 +968,20 @@ class Subscriber:
         except Exception as e:
             raise SubscriberException('SQ_HLR error provisioning the subscriber %s' % e)
 
-    def _provision_in_database(self, msisdn, name, balance, location='', equipment=''):
+    def _provision_in_database(self, msisdn, name, balance, location='', equipment='', package = 0):
         cur = self._open_local_cursor()
         try:
             cur.execute(
                 'INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status, '
-                'location, equipment) '
-                'VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s,%(equipment)s)',
+                'location, equipment, package) '
+                'VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s,%(equipment)s,%(package)s)',
                 {
                     'msisdn': msisdn,
                     'name': name,
                     'balance': Decimal(str(balance)),
                     'location': location,
-                    'equipment': equipment
+                    'equipment': equipment,
+                    'package': package
                 }
             )
             cur.execute(

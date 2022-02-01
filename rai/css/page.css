@@ -357,3 +357,8 @@ nav ul {
 	display: unset;
 	margin-left: 30px;
 }
+.package-ind {
+	vertical-align: super;
+	font-size: 8px;
+	font-weight: bold;
+}

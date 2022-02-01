@@ -19,8 +19,9 @@ class Subscriber
 	public $location = "";
 	public $roaming = 0;
 	public $equipment = "";
+	public $package = 0;
 
-	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="", $equipment="", $roaming="") {
+	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="", $equipment="", $roaming="", $package="") {
 		$this->id = $id;
 		$this->msisdn = $msisdn;
 		$this->name = $name;
@@ -31,6 +32,7 @@ class Subscriber
 		$this->location = $location;
 		$this->roaming = $roaming;
 		$this->equipment = $equipment;
+		$this->package = $package;
 	}
 
 	public function get($msisdn) {
@@ -57,6 +59,7 @@ class Subscriber
 			$this->location = $data[7];
 			$this->roaming = $data[8];
 			$this->equipment = $data[9];
+			$this->package = $data[10];
 
 		}
 	}
@@ -126,7 +129,7 @@ class Subscriber
 		$subscriber = array(
 			"msisdn" => $this->msisdn, "name" => $this->name,
 			"balance" => $this->balance, "location" => $this->location,
-			"equipment" => $this->equipment);
+			"equipment" => $this->equipment, "package" => $this->package);
 		try {
 			$response = \Httpful\Request::post($this->path)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
@@ -144,7 +147,7 @@ class Subscriber
 	}
 
 	public function edit() {
-		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "authorized" => $this->authorized, "subscription_status" => $this->subscription_status, "location" => $this->location, "equipment" => $this->equipment, "roaming" => $this->roaming);
+		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "authorized" => $this->authorized, "subscription_status" => $this->subscription_status, "location" => $this->location, "equipment" => $this->equipment, "roaming" => $this->roaming, "package" => $this->package);
 		try {
 			$response = \Httpful\Request::put($this->path."/".$this->msisdn)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {

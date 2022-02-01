@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-14 08:09+0100\n"
+"POT-Creation-Date: 2022-02-01 18:40+0100\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
 "Last-Translator: Keith <keith@rhizomatica.org>\n"
 "Language: es\n"
@@ -33,7 +33,7 @@ msgstr "Código de Área"
 msgid "Cost"
 msgstr "Costo"
 
-#: rates.php:37 cdr.php:62 sms.php:45 subscribers.php:164
+#: rates.php:37 cdr.php:62 sms.php:45 subscribers.php:165
 #: resellers_credit_history.php:41 resellers_transactions.php:39
 #: credit_history.php:41 resellers.php:64
 msgid "Loading data from server"
@@ -73,7 +73,7 @@ msgstr "ERROR AL CARGAR LA INFORMACIÓN DEL REVENDEDOR!"
 
 #: reseller_delete.php:17 reseller_delete.php:49 reseller_delete.php:53
 #: subscriber_delete.php:17 subscriber_delete.php:48 subscriber_delete.php:52
-#: subscriber_edit.php:170 subscriber_edit.php:174
+#: subscriber_edit.php:190 subscriber_edit.php:194
 msgid "Close"
 msgstr "Cerrar"
 
@@ -125,7 +125,7 @@ msgstr "Mensaje"
 msgid "Text of the SMS message"
 msgstr "Texto del mensaje SMS"
 
-#: send_sms.php:40 subscribers.php:155 subscribers.php:173
+#: send_sms.php:40 subscribers.php:156 subscribers.php:174
 msgid "Number"
 msgstr "Número Telefónico"
 
@@ -138,13 +138,13 @@ msgid "Bulk SMS"
 msgstr "SMS Masivo"
 
 #
-#: send_sms.php:50 subscribers.php:158 subscribers.php:176
-#: subscriber_edit.php:48 provisioning.php:87 provisioning.php:124
+#: send_sms.php:50 subscribers.php:159 subscribers.php:177
+#: subscriber_edit.php:67 provisioning.php:87 provisioning.php:124
 msgid "Location"
 msgstr "Ubicación"
 
 #
-#: send_sms.php:51 subscriber_edit.php:49 provisioning.php:88
+#: send_sms.php:51 subscriber_edit.php:68 provisioning.php:88
 #: provisioning.php:125
 msgid "Subscriber location"
 msgstr "Ubicación del usuario"
@@ -183,7 +183,7 @@ msgstr "ERROR AL ENVIAR EL SMS!"
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 resellers_provisioning.php:85
 #: resellers_provisioning.php:89 credit.php:146 credit.php:151
-#: provisioning.php:232 provisioning.php:237
+#: provisioning.php:237 provisioning.php:242
 msgid "Go Back"
 msgstr "Regresar"
 
@@ -234,11 +234,11 @@ msgstr "Mes:"
 msgid "Month"
 msgstr "Mes"
 
-#: credit_status.php:56 subscribers.php:135
+#: credit_status.php:56 subscribers.php:136
 msgid "Credit Sold"
 msgstr "Saldo Vendido"
 
-#: credit_status.php:57 subscribers.php:136
+#: credit_status.php:57 subscribers.php:137
 msgid "Credit Used"
 msgstr "Saldo Gastado"
 
@@ -344,7 +344,7 @@ msgstr "Error general"
 msgid "General error notice message"
 msgstr "Mensaje de aviso de error general"
 
-#: resellers_configuration.php:73 subscriber_edit.php:99
+#: resellers_configuration.php:73 subscriber_edit.php:118
 msgid "Save"
 msgstr "Guardar"
 
@@ -360,60 +360,60 @@ msgstr "Error al guardar los mensajes!"
 msgid "All"
 msgstr "Todos"
 
-#: subscribers.php:132
+#: subscribers.php:133
 msgid "Unpaid subscription"
 msgstr "Suscripción no pagada"
 
-#: subscribers.php:133
+#: subscribers.php:134
 msgid "Unauthorized"
 msgstr "No autorizado"
 
-#: subscribers.php:134
+#: subscribers.php:135
 msgid "Paid subscription"
 msgstr "Suscripción pagada"
 
-#: subscribers.php:137
+#: subscribers.php:138
 msgid "Online"
 msgstr "Conectado"
 
-#: subscribers.php:137 subscriber_edit.php:82
+#: subscribers.php:138 subscriber_edit.php:101
 msgid "Roaming"
 msgstr "'Roaming'"
 
-#: subscribers.php:138
+#: subscribers.php:139
 msgid "Offline"
 msgstr "Desconectado"
 
-#: subscribers.php:146
+#: subscribers.php:147
 msgid "Subscribers Phones"
 msgstr "Usuarios de la Red"
 
-#: subscribers.php:151 subscribers.php:169
+#: subscribers.php:152 subscribers.php:170
 msgid "Activation date"
 msgstr "Fecha de Activación"
 
-#: subscribers.php:152 subscribers.php:170
+#: subscribers.php:153 subscribers.php:171
 msgid "Subscription date"
 msgstr "Fecha de Suscripción"
 
-#: subscribers.php:153 subscribers.php:171
+#: subscribers.php:154 subscribers.php:172
 msgid "Subscription Status"
 msgstr "Estado de la Suscripción"
 
-#: subscribers.php:154 subscribers.php:172 subscriber_edit.php:74
+#: subscribers.php:155 subscribers.php:173 subscriber_edit.php:93
 msgid "Authorized"
 msgstr "Autorizado"
 
-#: subscribers.php:156 subscribers.php:174 subscriber_edit.php:24
+#: subscribers.php:157 subscribers.php:175 subscriber_edit.php:24
 #: provisioning.php:68 provisioning.php:108
 msgid "Name"
 msgstr "Nombre"
 
-#: subscribers.php:157 subscribers.php:175 resellers.php:57 resellers.php:72
+#: subscribers.php:158 subscribers.php:176 resellers.php:57 resellers.php:72
 msgid "Balance"
 msgstr "Saldo"
 
-#: subscribers.php:159 subscribers.php:177 resellers.php:59 resellers.php:74
+#: subscribers.php:160 subscribers.php:178 resellers.php:59 resellers.php:74
 msgid "Actions"
 msgstr "Acciones"
 
@@ -547,35 +547,35 @@ msgstr "Total de minutos por semana"
 msgid "Total Monthly Minutes"
 msgstr "Total de minutos mensuales"
 
-#: subscribers_processing.php:272
+#: subscribers_processing.php:276
 msgid "Roaming from"
 msgstr "En roaming desde"
 
-#: subscribers_processing.php:275
+#: subscribers_processing.php:279
 msgid "Tagged as roaming on"
 msgstr "Parece estar en roaming en"
 
-#: subscribers_processing.php:277
+#: subscribers_processing.php:281
 msgid "Roaming on"
 msgstr "En roaming en"
 
-#: subscribers_processing.php:289
+#: subscribers_processing.php:293
 msgid "Not authorized on HLR!"
 msgstr "Mo autorizado en HLR!"
 
-#: subscribers_processing.php:292
+#: subscribers_processing.php:296
 msgid "Authorized on HLR!"
 msgstr "Autorizado en HLR!"
 
-#: subscribers_processing.php:304
+#: subscribers_processing.php:308
 msgid "NOT_PAID"
 msgstr "NO_PAGADA"
 
-#: subscribers_processing.php:304
+#: subscribers_processing.php:308
 msgid "PAID"
 msgstr "PAGADA"
 
-#: subscribers_processing.php:311
+#: subscribers_processing.php:315
 msgid "Roaming User"
 msgstr "Usuario en Roaming"
 
@@ -628,7 +628,7 @@ msgstr "El PIN del revendedor no es válido"
 msgid "Initial balance is empty"
 msgstr "Saldo inicial vacío"
 
-#: resellers_provisioning.php:84 provisioning.php:228 provisioning.php:230
+#: resellers_provisioning.php:84 provisioning.php:233 provisioning.php:235
 msgid "Successfully provisioned with an initial balance of"
 msgstr "Se ha dado de alta con éxito con un saldo inicial de"
 
@@ -636,29 +636,29 @@ msgstr "Se ha dado de alta con éxito con un saldo inicial de"
 msgid "ERROR PROVISIONING RESELLER!"
 msgstr "¡ERROR AL DAR DE ALTA AL REVENDEDOR!"
 
-#: login.php:49
+#: login.php:50
 msgid "Username:"
 msgstr "Usuario:"
 
-#: login.php:53
+#: login.php:54
 msgid "Password:"
 msgstr "Contraseña:"
 
-#: login.php:67
+#: login.php:68
 msgid "Login"
 msgstr "Entrar"
 
 #
-#: login.php:81
+#: login.php:82
 msgid "Username is empty"
 msgstr "Usuario está vacío"
 
 #
-#: login.php:84
+#: login.php:85
 msgid "Password is empty"
 msgstr "Contraseña está vacío"
 
-#: login.php:87
+#: login.php:88
 msgid "Login Incorrect"
 msgstr "Login no exitoso"
 
@@ -667,8 +667,8 @@ msgid "Credit History"
 msgstr "Historial de recargas"
 
 #: credit_history.php:33 credit_history.php:48 subscriber_edit.php:29
-#: subscriber_edit.php:30 subscriber_edit.php:169 credit.php:32 credit.php:59
-#: provisioning.php:74 provisioning.php:230
+#: subscriber_edit.php:30 subscriber_edit.php:189 credit.php:32 credit.php:59
+#: provisioning.php:74 provisioning.php:235
 msgid "Subscriber number"
 msgstr "Teléfono del usuario"
 
@@ -692,39 +692,47 @@ msgstr "Equipo"
 msgid "a short description of the phone and model"
 msgstr "descripción del equipo"
 
-#: subscriber_edit.php:67
+#: subscriber_edit.php:39
+msgid "Package"
+msgstr "Paquete"
+
+#: subscriber_edit.php:40
+msgid "Call Tarrif Scheme"
+msgstr "Esquema de Cobro del usuario."
+
+#: subscriber_edit.php:86
 msgid "Subscription Paid"
 msgstr "Suscripción del usuario pagada"
 
-#: subscriber_edit.php:68 subscriber_edit.php:75 subscriber_edit.php:83
+#: subscriber_edit.php:87 subscriber_edit.php:94 subscriber_edit.php:102
 msgid "Check for yes uncheck for no"
 msgstr "Seleccionar para afirmativo deseleccionar para negativo"
 
-#: subscriber_edit.php:89
+#: subscriber_edit.php:108
 msgid "Credit"
 msgstr "Saldo"
 
-#: subscriber_edit.php:90
+#: subscriber_edit.php:109
 msgid "Account Balance"
 msgstr "Saldo de la cuenta"
 
-#: subscriber_edit.php:118
+#: subscriber_edit.php:137
 msgid "ERROR GETTING SUBSCRIBER INFO!</br>"
 msgstr "ERROR AL OBTENER INFORMACIÓN DEL USUARIO!"
 
-#: subscriber_edit.php:138 provisioning.php:167 provisioning.php:197
+#: subscriber_edit.php:158 provisioning.php:172 provisioning.php:202
 msgid "Name is empty"
 msgstr "Nombre está vacío"
 
-#: subscriber_edit.php:141
+#: subscriber_edit.php:161
 msgid "Subscriber number is invalid"
 msgstr "El Número de usuario es inválido"
 
-#: subscriber_edit.php:169
+#: subscriber_edit.php:189
 msgid "successfully modified"
 msgstr "modificado con éxito"
 
-#: subscriber_edit.php:173
+#: subscriber_edit.php:193
 msgid "ERROR SAVING SUBSCRIBER!"
 msgstr "ERROR AL GUARDAR USUARIO!"
 
@@ -893,34 +901,34 @@ msgstr "descripción corta del modelo de telefono - iPhone/Galaxy/etc"
 msgid "The phone must be connected or have recently attempted to connect"
 msgstr "El teléfono debe o estar conectado o haber recien intentado conectar"
 
-#: provisioning.php:179
+#: provisioning.php:184
 msgid "Subscriber already exists:"
 msgstr "Usuario ya existe:"
 
 #
-#: provisioning.php:181
+#: provisioning.php:186
 msgid "Subscriber not found"
 msgstr "Usuario no encontrado"
 
-#: provisioning.php:184
+#: provisioning.php:189
 msgid "Invalid IMEI"
 msgstr "IMEI no valido"
 
 #
-#: provisioning.php:200
+#: provisioning.php:205
 msgid "Subscriber number is empty"
 msgstr "Teléfono del usuario vacío"
 
 #
-#: provisioning.php:202
+#: provisioning.php:207
 msgid "Invalid number"
 msgstr "Número inválido"
 
-#: provisioning.php:228
+#: provisioning.php:233
 msgid "Subscriber already exists! New subscriber number"
 msgstr "El usuario ya existe! Número de nuevo usuario"
 
-#: provisioning.php:235
+#: provisioning.php:240
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr "ERROR AL DAR DE ALTA AL USUARIO"
 
