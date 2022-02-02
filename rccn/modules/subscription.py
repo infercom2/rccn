@@ -134,7 +134,13 @@ class Subscription:
             raise SubscribtionException('ERROR in getting unpaid subscriptions')
 
         sms = SMS()
+        sub = Subscriber()
         
         for mysub in subscribers_list:
+            package = sub.get_package(mysub[0])
             self.logger.debug("Send sms to %s %s" % (mysub[0], msg))
             sms.send(config['smsc'],mysub[0], msg)
+            if package > 0:
+                self.logger.info("Deactivate Package for %s", mysub[0])
+                sub.reset_package(mysub[0])
+                sms.send(config['smsc'],mysub[0], "Su paquete ha sido desactivado.")

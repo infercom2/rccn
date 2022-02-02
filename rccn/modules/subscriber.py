@@ -836,6 +836,24 @@ class Subscriber:
     def print_vty_hlr_info(self, msisdn):
         return self._osmo_hlr.show_by_msisdn(msisdn)
 
+    def reset_package(self, msisdn):
+        cur = self._open_local_cursor()
+        try:
+            cur.execute(
+                'UPDATE subscribers SET package = 0 WHERE msisdn = %(msisdn)s',
+                {'msisdn': msisdn}
+            )
+            if cur.rowcount > 0:
+                self._local_db_conn.commit()
+            else:
+                self._local_db_conn.rollback()
+                raise SubscriberException('PG_HLR Subscriber not found')
+        except psycopg2.DatabaseError as e:
+            self._local_db_conn.rollback()
+            raise SubscriberException('PG_HLR error changing auth status: %s' % e)
+        finally:
+            cur.close()
+
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
         # auth 1 subscriber enabled

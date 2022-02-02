@@ -51,7 +51,8 @@ if action == 'notice':
 elif action == 'reminder':
     subscription_log.info(
         'Send reminder to all subscribers that '
-        'haven\'t yet paid the subscription')
+        'haven\'t yet paid the subscription'
+        'and deactivate any package')
     try:
         rsc.send_subscription_fee_reminder(reminder_msg)
     except SubscriptionException as e:
