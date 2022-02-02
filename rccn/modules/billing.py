@@ -61,6 +61,8 @@ class Billing:
         return total_call_sec
 
     def get_call_cost(self, duration, cost):
+        if duration == 0:
+            return Decimal(0)
         call_duration_min = Decimal(duration) / 60
         final_call_duration = 1 if call_duration_min == 0 else math.ceil(call_duration_min)
         call_cost = Decimal(str(final_call_duration)) * Decimal(str(cost))
