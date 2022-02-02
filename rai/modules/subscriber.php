@@ -21,7 +21,7 @@ class Subscriber
 	public $equipment = "";
 	public $package = 0;
 
-	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="", $equipment="", $roaming="", $package="") {
+	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="", $equipment="", $roaming=0, $package=0) {
 		$this->id = $id;
 		$this->msisdn = $msisdn;
 		$this->name = $name;
