@@ -187,21 +187,27 @@ class Billing:
             else:
                 call_cost = self.get_call_cost(duration, rate[3])
 
-            # set destination_name and cost for the CDR
-            session.setVariable('destination_name', rate[1])
-            session.setVariable('cost', str(call_cost))
-            bill_log.info('Call duration: %d sec Call cost: %.2f' % (duration, call_cost))
-            
             try:
                 previous_balance = sub.get_balance(subscriber)
                 current_balance = previous_balance - call_cost
-                real_balance = 0 if current_balance < 0 else current_balance
+                if current_balance < 0:
+                    # There was not enough balance to cover the rounded up minutes
+                    real_balance = 0
+                    # Log what we ACTUALLY deducted in the CDR
+                    call_cost = previous_balance
+                else:
+                    real_balance = current_balance
                 bill_log.info('Previous balance: %.2f Current Balance: %.2f' % (previous_balance, real_balance))
                 sub.set_balance(subscriber, real_balance)
                 bill_log.info('Billing %s completed successfully' % subscriber)
             except SubscriberException as e:
                 bill_log.error('Error during billing the subscriber: %s' % e)
-        
+
+            # set destination_name and cost for the CDR
+            session.setVariable('destination_name', log_dest)
+            session.setVariable('cost', str(call_cost))
+            bill_log.info('Call duration: %d sec Call cost: %.2f' % (duration, call_cost))
+
         if context == 'INBOUND':
             bill_log.info('===========================================================================')
             bill_log.info('INBOUND Context')
