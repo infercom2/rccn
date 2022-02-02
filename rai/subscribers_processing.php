@@ -181,7 +181,7 @@
     $sQuery.= "
     UNION SELECT created, created AS subscription_date, authorized AS subscription_status,
     authorized AS authorized, msisdn, '' AS name, NULL AS balance,
-    '' AS location, created AS hlr_created,
+    '' AS location, NULL as package, created AS hlr_created,
     authorized AS hlr_auth, current_bts, home_bts FROM hlr ".$rWhereSql;
     }
 
