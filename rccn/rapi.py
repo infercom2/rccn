@@ -142,7 +142,7 @@ class SubscriberRESTService:
  
     # add new subscriber
     @route('/', Http.POST)
-    def post(self, request, msisdn, name, balance, location, equipment):
+    def post(self, request, msisdn, name, balance, location, equipment, package):
         api_log.info(
             '%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s equipment:"%s" package: "%s"',
             request.getHost().host, self.path, msisdn, name, balance, location, equipment, package
