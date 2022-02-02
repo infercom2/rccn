@@ -214,9 +214,11 @@ def build_msgs(smsq):
         log.debug("Valid Until: " + str(sms[4]))
         log.debug("Coding is \033[32m%s \033[0m" % str(coding))
         log.debug("UD HDR Indicator: " + str( sms[9] ))
-        log.debug("User Data: " + binascii.hexlify( userdata ))
-        
-        dtext = _dbd_decode_bin(userdata)
+        if userdata is not None:
+            log.debug("User Data: " + binascii.hexlify( userdata ))
+            dtext = _dbd_decode_bin(userdata)
+        else:
+            dtext = "00"
 
         if udhdr == 64:
             h = dtext[:7]
