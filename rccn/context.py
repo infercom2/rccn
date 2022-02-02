@@ -418,25 +418,50 @@ class Context:
             log.error(_ex)
             self.session.execute('playback', self.NOT_CREDIT_ENOUGH)
             self.session.hangup('OUTGOING_CALL_BARRED')
+        try:
+            subscriber_package = self.subscriber.get_package(subscriber_number)
+        except NoDataException as noe:
+            subscriber_package = 0
+        except SubscriberException as _ex:
+            log.error(_ex)
+            self.session.execute('playback', self.get_audio_file('SERVICE_UNAVAILABLE'))
+            self.session.hangup('SERVICE_UNAVAILABLE')
+            raise
 
         log.debug('Current subscriber balance: %.2f', current_subscriber_balance)
-        if current_subscriber_balance > Decimal('0.00'):
-            # subscriber has enough balance to make a call
+        log.debug('Current subscriber package: %d', subscriber_package)
+
+        if current_subscriber_balance > Decimal('0.00') or subscriber_package == 1:
+            # subscriber has enough balance/package to make a call
             self.session.setVariable('billing', '1')
             rate = self.billing.get_rate(self.destination_number)
             total_call_duration = self.billing.get_call_duration(current_subscriber_balance, rate[3])
+            if subscriber_package == 1:
+                if rate[1] == "Mexico Cellular-Telcel":
+                    log.info("Subscriber has package, adding five minutes to call duration.")
+                    total_call_duration = total_call_duration + 300
+                    self.session.execute('set', 'execute_on_answer_4=sched_broadcast +%s playback::tone_stream://%%(175,120,550,440);loops=4' %
+                                        (total_call_duration - 10))
+                elif current_subscriber_balance == Decimal('0.00'):
+                    log.info("Zero Balance and destination not included in package.")
+                    self.session.execute('playback', '002_saldo_insuficiente.gsm')
+                    self.session.hangup()
+                    return
             # Set destination_name here for CDR.
             self.session.setVariable('destination_name', rate[1])
             log.info('Total duration for the call before balance end is set to %d sec', total_call_duration)
-            mid_announcement = total_call_duration - 30
             self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' %
                                  total_call_duration)
-            if total_call_duration > 60:
-                self.session.execute('set',
-                                     'execute_on_answer_2=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' %
-                                     mid_announcement)
-            self.session.execute('set', 'execute_on_answer_3=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' %
-                                 (total_call_duration - 3))
+
+            if current_subscriber_balance > Decimal('0.00'):
+                # If the subscribers balance will be used, then schedule announcments
+                self.session.execute('set', 'execute_on_answer_2=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' %
+                                    (total_call_duration - 3))
+                if total_call_duration > 59:
+                    self.session.execute('set',
+                                         'execute_on_answer_3=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' %
+                                         (total_call_duration - 30))
+
             # set correct caller id based on the active provider
             try:
                 caller_id = self.numbering.get_callerid(subscriber_number, self.destination_number)

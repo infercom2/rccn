@@ -172,7 +172,14 @@ class Billing:
             sub = Subscriber()
             # get rate
             rate = self.get_rate(destination_number)
+            log_dest = rate[1]
             package = sub.get_package(subscriber)
+            if package == 1 and rate[1] == "Mexico Cellular-Telcel":
+                bill_log.info('Subscriber has package, removing 5 mins from call duration of %s seconds', duration)
+                log_dest = rate[1] + ' (P)'
+                duration = duration - 300
+                if duration < 0:
+                    duration = 0
             if 'charge_outbound_rate_type' in globals() and charge_outbound_rate_type == 'sec':
                 call_cost = Decimal(math.ceil((rate[3]/60)*duration * 100) / 100).quantize(Decimal('0.01'))
             else:
