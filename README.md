@@ -1,6 +1,8 @@
 RCCN
 ====
 
+** This repo is a clone from https://gitlab.tic-ac.org/rhizomatica/rccn
+
 Rhizomatica Community Cellular Network
 
 This is the public git repository for the all the code developed in the Rhizomatica Project.
